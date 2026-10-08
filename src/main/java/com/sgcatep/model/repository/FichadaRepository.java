@@ -11,14 +11,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FichadaRepository {
+public class FichadaRepository extends BaseRepository {
 
     private final UsuarioRepository usuarioRepository = new UsuarioRepository();
     private final AutorizacionRemotaRepository autorizacionRepository = new AutorizacionRemotaRepository();
 
     public Fichada buscarPorId(int idFichada) throws SQLException {
         String sql = "SELECT * FROM FICHADA WHERE id_fichada = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idFichada);
@@ -35,7 +35,7 @@ public class FichadaRepository {
     public List<Fichada> listarTodas() throws SQLException {
         List<Fichada> fichadas = new ArrayList<>();
         String sql = "SELECT * FROM FICHADA ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -49,7 +49,7 @@ public class FichadaRepository {
     public List<Fichada> listarPorUsuario(int idUsuario) throws SQLException {
         List<Fichada> fichadas = new ArrayList<>();
         String sql = "SELECT * FROM FICHADA WHERE id_usuario = ? ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -66,7 +66,7 @@ public class FichadaRepository {
     public List<Fichada> listarPorUsuarioYFecha(int idUsuario, LocalDate fecha) throws SQLException {
         List<Fichada> fichadas = new ArrayList<>();
         String sql = "SELECT * FROM FICHADA WHERE id_usuario = ? AND DATE(fecha_hora) = ? ORDER BY fecha_hora";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -87,7 +87,7 @@ public class FichadaRepository {
                 "JOIN USUARIO u ON f.id_usuario = u.id_usuario " +
                 "WHERE u.id_area = ? " +
                 "ORDER BY f.fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idArea);
@@ -104,7 +104,7 @@ public class FichadaRepository {
     public Fichada obtenerUltimaFichadaDelDia(int idUsuario) throws SQLException {
         String sql = "SELECT * FROM FICHADA WHERE id_usuario = ? AND DATE(fecha_hora) = CURDATE() " +
                 "ORDER BY fecha_hora DESC LIMIT 1";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -121,7 +121,7 @@ public class FichadaRepository {
     public boolean tieneEntradaHoy(int idUsuario) throws SQLException {
         String sql = "SELECT COUNT(*) FROM FICHADA WHERE id_usuario = ? AND tipo = 'ENTRADA' " +
                 "AND DATE(fecha_hora) = CURDATE()";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -138,7 +138,7 @@ public class FichadaRepository {
     public int insertar(Fichada fichada) throws SQLException {
         String sql = "INSERT INTO FICHADA (id_usuario, tipo, modalidad, fecha_hora, " +
                 "id_autorizacion_remota, observaciones) VALUES (?, ?, ?, ?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, fichada.getUsuario().getIdUsuario());
@@ -172,7 +172,7 @@ public class FichadaRepository {
 
     public boolean eliminar(int idFichada) throws SQLException {
         String sql = "DELETE FROM FICHADA WHERE id_fichada = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idFichada);

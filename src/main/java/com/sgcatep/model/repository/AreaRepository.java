@@ -7,11 +7,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AreaRepository {
+public class AreaRepository extends BaseRepository {
 
     public Area buscarPorId(int idArea) throws SQLException {
         String sql = "SELECT * FROM AREA WHERE id_area = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idArea);
@@ -27,7 +27,7 @@ public class AreaRepository {
 
     public Area buscarPorNombre(String nombre) throws SQLException {
         String sql = "SELECT * FROM AREA WHERE nombre_area = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nombre);
@@ -44,7 +44,7 @@ public class AreaRepository {
     public List<Area> listarTodas() throws SQLException {
         List<Area> areas = new ArrayList<>();
         String sql = "SELECT * FROM AREA ORDER BY nombre_area";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -58,7 +58,7 @@ public class AreaRepository {
     public List<Area> listarActivas() throws SQLException {
         List<Area> areas = new ArrayList<>();
         String sql = "SELECT * FROM AREA WHERE activa = TRUE ORDER BY nombre_area";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -71,7 +71,7 @@ public class AreaRepository {
 
     public int insertar(Area area) throws SQLException {
         String sql = "INSERT INTO AREA (nombre_area, codigo_area, descripcion, activa) VALUES (?, ?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, area.getNombre());
@@ -97,7 +97,7 @@ public class AreaRepository {
 
     public boolean actualizar(Area area) throws SQLException {
         String sql = "UPDATE AREA SET nombre_area = ?, codigo_area = ?, descripcion = ? WHERE id_area = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, area.getNombre());
@@ -111,7 +111,7 @@ public class AreaRepository {
 
     public boolean desactivar(int idArea) throws SQLException {
         String sql = "UPDATE AREA SET activa = FALSE WHERE id_area = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idArea);

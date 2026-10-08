@@ -8,13 +8,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RolRepository {
+public class RolRepository extends BaseRepository {
 
     private final PermisoRepository permisoRepository = new PermisoRepository();
 
     public Rol buscarPorId(int idRol) throws SQLException {
         String sql = "SELECT * FROM ROL WHERE id_rol = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idRol);
@@ -32,7 +32,7 @@ public class RolRepository {
 
     public Rol buscarPorNombre(String nombre) throws SQLException {
         String sql = "SELECT * FROM ROL WHERE nombre_rol = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nombre);
@@ -51,7 +51,7 @@ public class RolRepository {
     public List<Rol> listarTodos() throws SQLException {
         List<Rol> roles = new ArrayList<>();
         String sql = "SELECT * FROM ROL ORDER BY nombre_rol";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -67,7 +67,7 @@ public class RolRepository {
     public List<Rol> listarActivos() throws SQLException {
         List<Rol> roles = new ArrayList<>();
         String sql = "SELECT * FROM ROL WHERE activo = TRUE ORDER BY nombre_rol";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -86,7 +86,7 @@ public class RolRepository {
                 "JOIN USUARIO_ROL ur ON r.id_rol = ur.id_rol " +
                 "WHERE ur.id_usuario = ? AND r.activo = TRUE " +
                 "ORDER BY r.nombre_rol";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -104,7 +104,7 @@ public class RolRepository {
 
     public int insertar(Rol rol) throws SQLException {
         String sql = "INSERT INTO ROL (nombre_rol, descripcion, activo) VALUES (?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, rol.getNombre());
@@ -129,7 +129,7 @@ public class RolRepository {
 
     public boolean actualizar(Rol rol) throws SQLException {
         String sql = "UPDATE ROL SET nombre_rol = ?, descripcion = ? WHERE id_rol = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, rol.getNombre());
@@ -142,7 +142,7 @@ public class RolRepository {
 
     public boolean desactivar(int idRol) throws SQLException {
         String sql = "UPDATE ROL SET activo = FALSE WHERE id_rol = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idRol);
@@ -152,7 +152,7 @@ public class RolRepository {
 
     public boolean agregarPermiso(int idRol, int idPermiso) throws SQLException {
         String sql = "INSERT INTO ROL_PERMISO (id_rol, id_permiso) VALUES (?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idRol);
@@ -164,7 +164,7 @@ public class RolRepository {
 
     public boolean quitarPermiso(int idRol, int idPermiso) throws SQLException {
         String sql = "DELETE FROM ROL_PERMISO WHERE id_rol = ? AND id_permiso = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idRol);
@@ -176,7 +176,7 @@ public class RolRepository {
 
     public boolean quitarTodosLosPermisos(int idRol) throws SQLException {
         String sql = "DELETE FROM ROL_PERMISO WHERE id_rol = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idRol);

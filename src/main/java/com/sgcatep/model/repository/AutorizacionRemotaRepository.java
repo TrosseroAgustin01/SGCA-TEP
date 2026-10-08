@@ -9,13 +9,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AutorizacionRemotaRepository {
+public class AutorizacionRemotaRepository extends BaseRepository {
 
     private final UsuarioRepository usuarioRepository = new UsuarioRepository();
 
     public AutorizacionRemota buscarPorId(int idAutorizacion) throws SQLException {
         String sql = "SELECT * FROM AUTORIZACION_REMOTA WHERE id_autorizacion = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idAutorizacion);
@@ -32,7 +32,7 @@ public class AutorizacionRemotaRepository {
     public List<AutorizacionRemota> listarTodas() throws SQLException {
         List<AutorizacionRemota> autorizaciones = new ArrayList<>();
         String sql = "SELECT * FROM AUTORIZACION_REMOTA ORDER BY fecha_fin DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -46,7 +46,7 @@ public class AutorizacionRemotaRepository {
     public List<AutorizacionRemota> listarPorUsuario(int idUsuario) throws SQLException {
         List<AutorizacionRemota> autorizaciones = new ArrayList<>();
         String sql = "SELECT * FROM AUTORIZACION_REMOTA WHERE id_usuario = ? ORDER BY fecha_fin DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -65,7 +65,7 @@ public class AutorizacionRemotaRepository {
                 "WHERE id_usuario = ? AND activa = TRUE " +
                 "AND CURDATE() BETWEEN fecha_inicio AND fecha_fin " +
                 "ORDER BY fecha_fin DESC LIMIT 1";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -84,7 +84,7 @@ public class AutorizacionRemotaRepository {
         String sql = "SELECT * FROM AUTORIZACION_REMOTA " +
                 "WHERE activa = TRUE AND CURDATE() BETWEEN fecha_inicio AND fecha_fin " +
                 "ORDER BY fecha_fin DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -100,7 +100,7 @@ public class AutorizacionRemotaRepository {
         String sql = "SELECT * FROM AUTORIZACION_REMOTA " +
                 "WHERE CURDATE() > fecha_fin " +
                 "ORDER BY fecha_fin DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -114,7 +114,7 @@ public class AutorizacionRemotaRepository {
     public int insertar(AutorizacionRemota autorizacion) throws SQLException {
         String sql = "INSERT INTO AUTORIZACION_REMOTA (id_usuario, fecha_inicio, fecha_fin, " +
                 "motivo, activa, creada_por) VALUES (?, ?, ?, ?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, autorizacion.getUsuario().getIdUsuario());
@@ -143,7 +143,7 @@ public class AutorizacionRemotaRepository {
     public boolean actualizar(AutorizacionRemota autorizacion) throws SQLException {
         String sql = "UPDATE AUTORIZACION_REMOTA SET fecha_inicio = ?, fecha_fin = ?, " +
                 "motivo = ?, activa = ? WHERE id_autorizacion = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(autorizacion.getFechaInicio()));
@@ -158,7 +158,7 @@ public class AutorizacionRemotaRepository {
 
     public boolean desactivar(int idAutorizacion) throws SQLException {
         String sql = "UPDATE AUTORIZACION_REMOTA SET activa = FALSE WHERE id_autorizacion = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idAutorizacion);
@@ -168,7 +168,7 @@ public class AutorizacionRemotaRepository {
 
     public boolean eliminar(int idAutorizacion) throws SQLException {
         String sql = "DELETE FROM AUTORIZACION_REMOTA WHERE id_autorizacion = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idAutorizacion);

@@ -12,14 +12,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsuarioRepository {
+public class UsuarioRepository extends BaseRepository {
 
     private final AreaRepository areaRepository = new AreaRepository();
     private final RolRepository rolRepository = new RolRepository();
 
     public Usuario buscarPorId(int idUsuario) throws SQLException {
         String sql = "SELECT * FROM USUARIO WHERE id_usuario = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -37,7 +37,7 @@ public class UsuarioRepository {
 
     public Usuario buscarPorDni(String dni) throws SQLException {
         String sql = "SELECT * FROM USUARIO WHERE dni = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, dni);
@@ -55,7 +55,7 @@ public class UsuarioRepository {
 
     public Usuario buscarPorEmail(String email) throws SQLException {
         String sql = "SELECT * FROM USUARIO WHERE email = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email);
@@ -74,7 +74,7 @@ public class UsuarioRepository {
     public Usuario autenticar(String dni, String contraseñaPlana) throws SQLException {
         String contraseñaHash = hashearContraseña(contraseñaPlana);
         String sql = "SELECT * FROM USUARIO WHERE dni = ? AND contraseña = ? AND activo = TRUE";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, dni);
@@ -94,7 +94,7 @@ public class UsuarioRepository {
     public List<Usuario> listarTodos() throws SQLException {
         List<Usuario> usuarios = new ArrayList<>();
         String sql = "SELECT * FROM USUARIO ORDER BY apellido, nombre";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -110,7 +110,7 @@ public class UsuarioRepository {
     public List<Usuario> listarActivos() throws SQLException {
         List<Usuario> usuarios = new ArrayList<>();
         String sql = "SELECT * FROM USUARIO WHERE activo = TRUE ORDER BY apellido, nombre";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -126,7 +126,7 @@ public class UsuarioRepository {
     public List<Usuario> listarPorArea(int idArea) throws SQLException {
         List<Usuario> usuarios = new ArrayList<>();
         String sql = "SELECT * FROM USUARIO WHERE id_area = ? ORDER BY apellido, nombre";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idArea);
@@ -145,7 +145,7 @@ public class UsuarioRepository {
     public int insertar(Usuario usuario) throws SQLException {
         String sql = "INSERT INTO USUARIO (dni, nombre, apellido, email, contraseña, activo, id_area) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, usuario.getDni());
@@ -175,7 +175,7 @@ public class UsuarioRepository {
     public boolean actualizar(Usuario usuario) throws SQLException {
         String sql = "UPDATE USUARIO SET nombre = ?, apellido = ?, email = ?, " +
                 "activo = ?, id_area = ? WHERE id_usuario = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, usuario.getNombre());
@@ -191,7 +191,7 @@ public class UsuarioRepository {
 
     public boolean cambiarContraseña(int idUsuario, String nuevaContraseña) throws SQLException {
         String sql = "UPDATE USUARIO SET contraseña = ? WHERE id_usuario = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, hashearContraseña(nuevaContraseña));
@@ -203,7 +203,7 @@ public class UsuarioRepository {
 
     public boolean desactivar(int idUsuario) throws SQLException {
         String sql = "UPDATE USUARIO SET activo = FALSE WHERE id_usuario = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -213,7 +213,7 @@ public class UsuarioRepository {
 
     public boolean activar(int idUsuario) throws SQLException {
         String sql = "UPDATE USUARIO SET activo = TRUE WHERE id_usuario = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -223,7 +223,7 @@ public class UsuarioRepository {
 
     public boolean asignarRol(int idUsuario, int idArea, int idRol) throws SQLException {
         String sql = "INSERT INTO USUARIO_ROL (id_usuario, id_area, id_rol) VALUES (?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -236,7 +236,7 @@ public class UsuarioRepository {
 
     public boolean quitarRol(int idUsuario, int idArea, int idRol) throws SQLException {
         String sql = "DELETE FROM USUARIO_ROL WHERE id_usuario = ? AND id_area = ? AND id_rol = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);

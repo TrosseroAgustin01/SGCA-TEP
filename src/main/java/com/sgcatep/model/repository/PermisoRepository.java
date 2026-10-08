@@ -8,13 +8,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PermisoRepository {
+public class PermisoRepository extends BaseRepository {
 
     private final SistemaRepository sistemaRepository = new SistemaRepository();
 
     public Permiso buscarPorId(int idPermiso) throws SQLException {
         String sql = "SELECT * FROM PERMISO WHERE id_permiso = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idPermiso);
@@ -32,7 +32,7 @@ public class PermisoRepository {
 
     public Permiso buscarPorNombre(String nombre) throws SQLException {
         String sql = "SELECT * FROM PERMISO WHERE nombre_permiso = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nombre);
@@ -51,7 +51,7 @@ public class PermisoRepository {
     public List<Permiso> listarTodos() throws SQLException {
         List<Permiso> permisos = new ArrayList<>();
         String sql = "SELECT * FROM PERMISO ORDER BY nombre_permiso";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -67,7 +67,7 @@ public class PermisoRepository {
     public List<Permiso> listarActivos() throws SQLException {
         List<Permiso> permisos = new ArrayList<>();
         String sql = "SELECT * FROM PERMISO WHERE activo = TRUE ORDER BY nombre_permiso";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -86,7 +86,7 @@ public class PermisoRepository {
                 "JOIN ROL_PERMISO rp ON p.id_permiso = rp.id_permiso " +
                 "WHERE rp.id_rol = ? AND p.activo = TRUE " +
                 "ORDER BY p.nombre_permiso";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idRol);
@@ -104,7 +104,7 @@ public class PermisoRepository {
 
     public int insertar(Permiso permiso) throws SQLException {
         String sql = "INSERT INTO PERMISO (nombre_permiso, descripcion, activo) VALUES (?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, permiso.getNombre());
@@ -129,7 +129,7 @@ public class PermisoRepository {
 
     public boolean actualizar(Permiso permiso) throws SQLException {
         String sql = "UPDATE PERMISO SET nombre_permiso = ?, descripcion = ? WHERE id_permiso = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, permiso.getNombre());
@@ -142,7 +142,7 @@ public class PermisoRepository {
 
     public boolean desactivar(int idPermiso) throws SQLException {
         String sql = "UPDATE PERMISO SET activo = FALSE WHERE id_permiso = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idPermiso);
@@ -152,7 +152,7 @@ public class PermisoRepository {
 
     public boolean asociarSistema(int idPermiso, int idSistema) throws SQLException {
         String sql = "INSERT INTO PERMISO_SISTEMA (id_permiso, id_sistema, obligatorio) VALUES (?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idPermiso);
@@ -165,7 +165,7 @@ public class PermisoRepository {
 
     public boolean desasociarSistema(int idPermiso, int idSistema) throws SQLException {
         String sql = "DELETE FROM PERMISO_SISTEMA WHERE id_permiso = ? AND id_sistema = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idPermiso);
@@ -180,7 +180,7 @@ public class PermisoRepository {
         String sql = "SELECT s.* FROM SISTEMA s " +
                 "JOIN PERMISO_SISTEMA ps ON s.id_sistema = ps.id_sistema " +
                 "WHERE ps.id_permiso = ? AND s.activo = TRUE";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, permiso.getIdPermiso());

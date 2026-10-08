@@ -10,14 +10,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LogAuditoriaRepository {
+public class LogAuditoriaRepository extends BaseRepository {
 
     private final UsuarioRepository usuarioRepository = new UsuarioRepository();
     private final SistemaRepository sistemaRepository = new SistemaRepository();
 
     public LogAuditoria buscarPorId(int idLog) throws SQLException {
         String sql = "SELECT * FROM LOG_AUDITORIA WHERE id_log = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idLog);
@@ -34,7 +34,7 @@ public class LogAuditoriaRepository {
     public List<LogAuditoria> listarTodos() throws SQLException {
         List<LogAuditoria> logs = new ArrayList<>();
         String sql = "SELECT * FROM LOG_AUDITORIA ORDER BY fecha_hora DESC LIMIT 100";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -48,7 +48,7 @@ public class LogAuditoriaRepository {
     public List<LogAuditoria> listarPorUsuario(int idUsuario) throws SQLException {
         List<LogAuditoria> logs = new ArrayList<>();
         String sql = "SELECT * FROM LOG_AUDITORIA WHERE id_usuario = ? ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -65,7 +65,7 @@ public class LogAuditoriaRepository {
     public List<LogAuditoria> listarPorFecha(LocalDate fecha) throws SQLException {
         List<LogAuditoria> logs = new ArrayList<>();
         String sql = "SELECT * FROM LOG_AUDITORIA WHERE DATE(fecha_hora) = ? ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(fecha));
@@ -84,7 +84,7 @@ public class LogAuditoriaRepository {
         String sql = "SELECT * FROM LOG_AUDITORIA " +
                 "WHERE resultado = 'RECHAZADO' AND fecha_hora >= NOW() - INTERVAL 1 DAY " +
                 "ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -98,7 +98,7 @@ public class LogAuditoriaRepository {
     public List<LogAuditoria> listarPorTipoEvento(String tipoEvento) throws SQLException {
         List<LogAuditoria> logs = new ArrayList<>();
         String sql = "SELECT * FROM LOG_AUDITORIA WHERE tipo_evento = ? ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, tipoEvento);
@@ -115,7 +115,7 @@ public class LogAuditoriaRepository {
     public List<LogAuditoria> listarPorSistema(int idSistema) throws SQLException {
         List<LogAuditoria> logs = new ArrayList<>();
         String sql = "SELECT * FROM LOG_AUDITORIA WHERE id_sistema = ? ORDER BY fecha_hora DESC";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idSistema);
@@ -133,7 +133,7 @@ public class LogAuditoriaRepository {
         String sql = "INSERT INTO LOG_AUDITORIA (id_usuario, tipo_evento, resultado, " +
                 "motivo_rechazo, detalle, id_sistema, detalles_json, direccion_ip) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             if (log.getUsuario() != null) {

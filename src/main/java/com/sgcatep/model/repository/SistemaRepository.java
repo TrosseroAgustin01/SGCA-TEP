@@ -7,11 +7,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SistemaRepository {
+public class SistemaRepository extends BaseRepository {
 
     public Sistema buscarPorId(int idSistema) throws SQLException {
         String sql = "SELECT * FROM SISTEMA WHERE id_sistema = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idSistema);
@@ -27,7 +27,7 @@ public class SistemaRepository {
 
     public Sistema buscarPorNombre(String nombre) throws SQLException {
         String sql = "SELECT * FROM SISTEMA WHERE nombre_sistema = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nombre);
@@ -44,7 +44,7 @@ public class SistemaRepository {
     public List<Sistema> listarTodos() throws SQLException {
         List<Sistema> sistemas = new ArrayList<>();
         String sql = "SELECT * FROM SISTEMA ORDER BY nombre_sistema";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -58,7 +58,7 @@ public class SistemaRepository {
     public List<Sistema> listarActivos() throws SQLException {
         List<Sistema> sistemas = new ArrayList<>();
         String sql = "SELECT * FROM SISTEMA WHERE activo = TRUE ORDER BY nombre_sistema";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -71,7 +71,7 @@ public class SistemaRepository {
 
     public int insertar(Sistema sistema) throws SQLException {
         String sql = "INSERT INTO SISTEMA (nombre_sistema, url_endpoint, descripcion, activo) VALUES (?, ?, ?, ?)";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, sistema.getNombre());
@@ -97,7 +97,7 @@ public class SistemaRepository {
 
     public boolean actualizar(Sistema sistema) throws SQLException {
         String sql = "UPDATE SISTEMA SET nombre_sistema = ?, url_endpoint = ?, descripcion = ? WHERE id_sistema = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, sistema.getNombre());
@@ -111,7 +111,7 @@ public class SistemaRepository {
 
     public boolean desactivar(int idSistema) throws SQLException {
         String sql = "UPDATE SISTEMA SET activo = FALSE WHERE id_sistema = ?";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idSistema);
@@ -129,7 +129,7 @@ public class SistemaRepository {
                 "WHERE ur.id_usuario = ? AND s.activo = TRUE " +
                 "ORDER BY s.nombre_sistema";
 
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
