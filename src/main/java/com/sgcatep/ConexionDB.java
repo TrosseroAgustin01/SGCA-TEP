@@ -11,22 +11,22 @@ public class ConexionDB {
     private static final String PASSWORD = "desa";
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
 
-    // Instancia única de conexión (patrón Singleton)
+    // Solo Instanciamos una vez la BD
     private static Connection connection = null;
 
 
     private ConexionDB() {
-        // Vacío intencionalmente - clase utility
+
     }
 
     public static Connection getConnection() throws SQLException {
         try {
-            // Si no hay conexión O si está cerrada, crear una nueva
+            // Si no hay conexión O, si está cerrada, crear una nueva
             if (connection == null || connection.isClosed()) {
-                // Carga el driver MySQL
+                // Cargamos el driver MySQL
                 Class.forName(DRIVER);
 
-                // Crea la conexión
+                // Creamos la conexión
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
 
                 System.out.println("✓ Conexión a BD exitosa: " + URL);
@@ -53,7 +53,7 @@ public class ConexionDB {
     }
 
     /**
-     * Verifica si hay una conexión activa,
+     * Verificamos si hay una conexión activa,
      * return true si la conexión existe y está abierta
      */
     public static boolean isConnected() {
