@@ -1,0 +1,106 @@
+/* FONDO GENERAL */
+.root {
+    -fx-background-color: #eef2f7;
+    -fx-font-family: "Arial";
+}
+
+/* HEADER */
+.header {
+    -fx-background-color: #1b3a5c;
+    -fx-padding: 14px 24px;
+}
+.header-titulo {
+    -fx-text-fill: white;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+.header-subtitulo {
+    -fx-text-fill: #a0bcd8;
+    -fx-font-size: 11px;
+}
+
+/* CARD BLANCA */
+.card {
+    -fx-background-color: white;
+    -fx-padding: 32px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 2);
+}
+
+/* ETIQUETA CU */
+.cu-tag {
+    -fx-text-fill: #2196F3;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+.card-titulo {
+    -fx-text-fill: #1b3a5c;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.card-subtitulo {
+    -fx-text-fill: #777777;
+    -fx-font-size: 12px;
+}
+
+/* INPUTS */
+.text-field, .password-field {
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 13px;
+    -fx-pref-height: 38px;
+    -fx-background-color: white;
+}
+.combo-box {
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-background-color: white;
+    -fx-font-size: 13px;
+}
+
+/* BOTONES */
+.btn-primario {
+    -fx-background-color: #1b3a5c;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 10px 20px;
+}
+.btn-primario:hover {
+    -fx-background-color: #254d7a;
+}
+.btn-secundario {
+    -fx-background-color: white;
+    -fx-text-fill: #444444;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 10px 20px;
+}
+.btn-peligro {
+    -fx-background-color: #c62828;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 10px 20px;
+}
+
+/* MENSAJES */
+.msg-exito  { -fx-text-fill: #2e7d32; -fx-font-size: 13px; }
+.msg-error  { -fx-text-fill: #c62828; -fx-font-size: 13px; }
+.msg-aviso  { -fx-text-fill: #e65100; -fx-font-size: 13px; }
+
+/* FOOTER */
+.footer-texto {
+    -fx-text-fill: #999999;
+    -fx-font-size: 11px;
+}

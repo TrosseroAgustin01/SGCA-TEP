@@ -7,10 +7,14 @@ import com.sgcatep.model.domain.Usuario;
 import com.sgcatep.model.repository.LogAuditoriaRepository;
 import com.sgcatep.model.repository.RolRepository;
 import com.sgcatep.model.repository.UsuarioRepository;
+import com.sgcatep.model.domain.Permiso;
+import com.sgcatep.ConexionDB;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class GestorAcceso {
 
@@ -23,9 +27,20 @@ public class GestorAcceso {
     public Map<String, Object> solicitarAcceso(Usuario usuario, Sistema sistema) throws SQLException {
         Map<String, Object> resultado = new HashMap<>();
 
+        // Estado vigente en BD (diagrama CU-05, pasos 4-5 y 14-15).
+        // Variable local: cada solicitud tiene su propio estado.
+        Usuario usuarioActual = usuarioRepository.buscarPorId(usuario.getIdUsuario());
+        if (usuarioActual == null) {
+            logRepository.registrarRechazo(null, "SOLICITUD_ACCESO",
+                    "USUARIO_NO_EXISTE", "Usuario id " + usuario.getIdUsuario() + " no encontrado", sistema);
+            resultado.put("autorizado", false);
+            resultado.put("motivo", "Usuario no encontrado");
+            return resultado;
+        }
+
         // Validación 1: ¿Usuario activo?
-        if (!validador.verificarEstadoUsuario(usuario)) {
-            logRepository.registrarRechazo(usuario, "SOLICITUD_ACCESO",
+        if (!validador.verificarEstadoUsuario(usuarioActual)) {
+            logRepository.registrarRechazo(usuarioActual, "SOLICITUD_ACCESO",
                     "USUARIO_INACTIVO", "Usuario inactivo", sistema);
 
             resultado.put("autorizado", false);
@@ -34,8 +49,8 @@ public class GestorAcceso {
         }
 
         // Validación 2: ¿Tiene permisos?
-        if (!validador.verificarPermisos(usuario, sistema)) {
-            logRepository.registrarRechazo(usuario, "SOLICITUD_ACCESO",
+        if (!validador.verificarPermisos(usuarioActual, sistema)) {
+            logRepository.registrarRechazo(usuarioActual, "SOLICITUD_ACCESO",
                     "SIN_PERMISOS", "No posee permisos para este sistema", sistema);
 
             resultado.put("autorizado", false);
@@ -44,8 +59,8 @@ public class GestorAcceso {
         }
 
         // Validación 3: ¿Tiene presencia válida?
-        if (!validador.verificarPresencia(usuario)) {
-            logRepository.registrarRechazo(usuario, "SOLICITUD_ACCESO",
+        if (!validador.verificarPresencia(usuarioActual)) {
+            logRepository.registrarRechazo(usuarioActual, "SOLICITUD_ACCESO",
                     "SIN_PRESENCIA", "No registra fichada de entrada activa", sistema);
 
             resultado.put("autorizado", false);
@@ -54,13 +69,13 @@ public class GestorAcceso {
         }
 
         // Las 3 validaciones pasaron → AUTORIZADO
-        logRepository.registrarEvento(usuario, "SOLICITUD_ACCESO",
+        logRepository.registrarEvento(usuarioActual, "SOLICITUD_ACCESO",
                 LogAuditoria.Resultado.AUTORIZADO,
                 "Acceso autorizado: Activo, Permisos y Presencia OK", sistema);
 
         resultado.put("autorizado", true);
         resultado.put("motivo", "Acceso concedido correctamente");
-        resultado.put("usuario", usuario);
+        resultado.put("usuario", usuarioActual);
         resultado.put("sistema", sistema);
         return resultado;
     }
@@ -81,34 +96,56 @@ public class GestorAcceso {
         return resultado;
     }
 
-    public boolean asignarRol(Usuario usuario, Rol rol, int idArea) throws SQLException {
-        if (usuario == null || rol == null) {
+    public boolean asignarRol(Usuario admin, Usuario destino, Rol rol, int idArea,
+                              List<Permiso> permisos) throws SQLException {
+        if (admin == null || destino == null || rol == null) {
             return false;
         }
 
-        if (!validador.verificarEstadoUsuario(usuario)) {
-            logRepository.registrarRechazo(usuario, "ASIGNACION_ROL",
-                    "USUARIO_INACTIVO", "No se puede asignar rol a usuario inactivo", null);
+        if (!validador.verificarEstadoUsuario(destino)) {
+            logRepository.registrarRechazo(admin, "ASIGNACION_ROL", "USUARIO_INACTIVO",
+                    "Usuario destino inactivo: " + destino.getDni(), null);
             return false;
         }
 
-        Rol rolExistente = rolRepository.buscarPorId(rol.getIdRol());
-        if (rolExistente == null) {
-            logRepository.registrarRechazo(usuario, "ASIGNACION_ROL",
-                    "ROL_NO_EXISTE", "El rol seleccionado no existe", null);
+        if (rolRepository.buscarPorId(rol.getIdRol()) == null) {
+            logRepository.registrarRechazo(admin, "ASIGNACION_ROL", "ROL_NO_EXISTE",
+                    "Rol inexistente para usuario " + destino.getDni(), null);
             return false;
         }
 
-        boolean asignado = usuarioRepository.asignarRol(
-                usuario.getIdUsuario(), idArea, rol.getIdRol());
+        // asignamos los roles y permisos
+        Connection conn = ConexionDB.getConnection();
+        conn.setAutoCommit(false);
+        try {
+            boolean asignado = usuarioRepository.asignarRol(
+                    destino.getIdUsuario(), idArea, rol.getIdRol());
+            if (!asignado) {
+                conn.rollback();
+                return false;
+            }
 
-        if (asignado) {
-            String detalle = "Rol " + rol.getNombre() + " asignado en área " + idArea;
-            logRepository.registrarEvento(usuario, "ASIGNACION_ROL",
-                    LogAuditoria.Resultado.AUTORIZADO, detalle, null);
+            if (permisos != null) {
+                rolRepository.quitarTodosLosPermisos(rol.getIdRol());
+                for (Permiso p : permisos) {
+                    rolRepository.agregarPermiso(rol.getIdRol(), p.getIdPermiso());
+                }
+            }
+
+            // El administrador lo registra; el usuario va en el detalle
+            logRepository.registrarEvento(admin, "ASIGNACION_ROL",
+                    LogAuditoria.Resultado.AUTORIZADO,
+                    "Destino: " + destino.getIdUsuario() + ", Rol: " + rol.getNombre()
+                            + ", Área: " + idArea, null);
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
         }
-
-        return asignado;
     }
 
     public boolean quitarRol(Usuario usuario, Rol rol, int idArea) throws SQLException {

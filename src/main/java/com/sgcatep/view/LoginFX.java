@@ -6,12 +6,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-
 import java.sql.SQLException;
 
 public class LoginFX {
@@ -22,76 +20,121 @@ public class LoginFX {
     public void show(Stage primaryStage) {
         this.stage = primaryStage;
 
-        Label titulo = new Label("SGCA-TEP");
-        titulo.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        // ── HEADER ──────────────────────────────────────
+        Label lblTitulo = new Label("SGCA-TEP");
+        lblTitulo.getStyleClass().add("header-titulo");
 
-        Label subtitulo = new Label("Sistema de Gestión y Control de Acceso");
-        subtitulo.setFont(Font.font("Arial", 14));
+        Label lblSub = new Label("Tribunal Electoral Provincial de Santa Fe");
+        lblSub.getStyleClass().add("header-subtitulo");
+
+        VBox textoHeader = new VBox(2, lblTitulo, lblSub);
+
+        // Ícono simple con texto
+        Label icono = new Label("⊛");
+        icono.setStyle("-fx-text-fill: white; -fx-font-size: 22px;");
+
+        HBox header = new HBox(12, icono, textoHeader);
+        header.getStyleClass().add("header");
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPrefWidth(Double.MAX_VALUE);
+
+        // ── CARD ─────────────────────────────────────────
+        Label cuTag = new Label("CU-05");
+        cuTag.getStyleClass().add("cu-tag");
+
+        Label cardTitulo = new Label("Ingreso al sistema");
+        cardTitulo.getStyleClass().add("card-titulo");
+        cardTitulo.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+
+        Label cardSub = new Label("Ingrese sus credenciales para continuar.");
+        cardSub.getStyleClass().add("card-subtitulo");
+
+        Separator sep = new Separator();
+        sep.setPadding(new Insets(4, 0, 4, 0));
 
         Label lblDni = new Label("DNI:");
         TextField txtDni = new TextField();
         txtDni.setPromptText("Ingrese su DNI (sin puntos ni guiones)");
-        txtDni.setMaxWidth(250);
+        txtDni.setPrefWidth(320);
 
-        Label lblPassword = new Label("Contraseña:");
-        PasswordField txtPassword = new PasswordField();
-        txtPassword.setPromptText("Ingrese su contraseña");
-        txtPassword.setMaxWidth(250);
+        Label lblPass = new Label("Contraseña:");
+        PasswordField txtPass = new PasswordField();
+        txtPass.setPromptText("Ingrese su contraseña");
+        txtPass.setPrefWidth(320);
 
         Label lblMensaje = new Label();
-        lblMensaje.setStyle("-fx-text-fill: red;");
+        lblMensaje.getStyleClass().add("msg-error");
+        lblMensaje.setWrapText(true);
 
-        Button btnIngresar = new Button("Ingresar");
-        btnIngresar.setPrefWidth(250);
-        btnIngresar.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-size: 14px;");
+        Button btnIngresar = new Button("INGRESAR AL SISTEMA");
+        btnIngresar.getStyleClass().add("btn-primario");
+        btnIngresar.setPrefWidth(320);
+        btnIngresar.setPrefHeight(42);
 
         Button btnSalir = new Button("Salir");
-        btnSalir.setPrefWidth(250);
+        btnSalir.getStyleClass().add("btn-secundario");
+        btnSalir.setPrefWidth(320);
 
-        btnIngresar.setOnAction(e -> {
-            String dni = txtDni.getText().trim();
-            String password = txtPassword.getText().trim();
+        btnIngresar.setOnAction(e -> intentarLogin(txtDni, txtPass, lblMensaje));
+        txtPass.setOnAction(e -> btnIngresar.fire());
+        btnSalir.setOnAction(e -> { stage.close(); System.exit(0); });
 
-            if (dni.isEmpty() || password.isEmpty()) {
-                lblMensaje.setText("Debe completar todos los campos");
-                return;
-            }
+        VBox card = new VBox(12,
+                cuTag, cardTitulo, cardSub, sep,
+                lblDni, txtDni,
+                lblPass, txtPass,
+                lblMensaje,
+                btnIngresar, btnSalir
+        );
+        card.getStyleClass().add("card");
+        card.setMaxWidth(380);
+        card.setAlignment(Pos.CENTER_LEFT);
 
-            try {
-                Usuario usuario = gestorAcceso.login(dni, password);
-                if (usuario != null) {
-                    lblMensaje.setStyle("-fx-text-fill: green;");
-                    lblMensaje.setText("Bienvenido " + usuario.getNombre() + " " + usuario.getApellido());
+        // ── FOOTER ───────────────────────────────────────
+        Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
+        footer.getStyleClass().add("footer-texto");
 
-                    MenuPrincipalFX menu = new MenuPrincipalFX();
-                    menu.show(stage, usuario);
-                } else {
-                    lblMensaje.setStyle("-fx-text-fill: red;");
-                    lblMensaje.setText("DNI o contraseña incorrectos");
-                    txtPassword.clear();
-                }
-            } catch (SQLException ex) {
-                lblMensaje.setText("Error de conexión: " + ex.getMessage());
-            }
-        });
+        HBox footerBox = new HBox(footer);
+        footerBox.setAlignment(Pos.CENTER);
+        footerBox.setPadding(new Insets(12));
 
-        txtPassword.setOnAction(e -> btnIngresar.fire());
+        // ── ENSAMBLADO ───────────────────────────────────
+        StackPane centro = new StackPane(card);
+        centro.setPadding(new Insets(40));
+        VBox.setVgrow(centro, Priority.ALWAYS);
 
-        btnSalir.setOnAction(e -> {
-            stage.close();
-            System.exit(0);
-        });
+        VBox root = new VBox(header, centro, footerBox);
 
-        VBox layout = new VBox(15);
-        layout.setAlignment(Pos.CENTER);
-        layout.setPadding(new Insets(40));
-        layout.getChildren().addAll(titulo, subtitulo, lblDni, txtDni, lblPassword, txtPassword,
-                lblMensaje, btnIngresar, btnSalir);
+        Scene scene = new Scene(root, 500, 560);
+        scene.getStylesheets().add(
+                getClass().getResource("/styles.css").toExternalForm()
+        );
 
-        Scene scene = new Scene(layout, 450, 500);
         stage.setTitle("SGCA-TEP - Login");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    private void intentarLogin(TextField txtDni, PasswordField txtPass, Label lblMensaje) {
+        String dni = txtDni.getText().trim();
+        String pass = txtPass.getText().trim();
+
+        if (dni.isEmpty() || pass.isEmpty()) {
+            lblMensaje.setText("Debe completar todos los campos.");
+            return;
+        }
+        try {
+            Usuario usuario = gestorAcceso.login(dni, pass);
+            if (usuario != null) {
+                MenuPrincipalFX menu = new MenuPrincipalFX();
+                menu.show(stage, usuario);
+            } else {
+                lblMensaje.setText("DNI o contraseña incorrectos.");
+                txtPass.clear();
+            }
+        } catch (SQLException ex) {
+            lblMensaje.setText("Error de conexión: " + ex.getMessage());
+        }
     }
 }

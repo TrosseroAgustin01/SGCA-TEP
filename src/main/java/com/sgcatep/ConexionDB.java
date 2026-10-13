@@ -28,6 +28,10 @@ public class ConexionDB {
 
                 // Creamos la conexión
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                // Configuramos que se adapte al horario local.
+                try (java.sql.Statement st = connection.createStatement()) {
+                    st.execute("SET time_zone = '-03:00'");
+                }
 
                 System.out.println("✓ Conexión a BD exitosa: " + URL);
             }
