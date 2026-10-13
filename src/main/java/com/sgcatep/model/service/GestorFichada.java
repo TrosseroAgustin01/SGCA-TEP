@@ -20,6 +20,13 @@ public class GestorFichada {
     public Fichada registrarFichada(Usuario usuario, Fichada.Tipo tipo, Fichada.Modalidad modalidad)
             throws SQLException {
 
+        if (tipo == null || modalidad == null
+                || !validador.validarDatos(usuario, tipo.name(), modalidad.name())) {
+            logRepository.registrarRechazo(usuario, "FICHADA_REGISTRADA",
+                    "DATOS_INVALIDOS", "Tipo o modalidad de fichada inválidos", null);
+            return null;
+        }
+
         if (!validador.verificarEstadoUsuario(usuario)) {
             logRepository.registrarRechazo(usuario, "FICHADA_REGISTRADA",
                     "USUARIO_INACTIVO", "Usuario intentó fichar estando inactivo", null);
@@ -42,7 +49,7 @@ public class GestorFichada {
         int idGenerado = fichadaRepository.insertar(fichada);
 
         if (idGenerado > 0) {
-            String detalle = "Tipo: " + tipo + ", Modalidad: " + modalidad;
+            String detalle = "Fichada " + idGenerado + ", Tipo: " + tipo + ", Modalidad: " + modalidad;
             logRepository.registrarEvento(usuario, "FICHADA_REGISTRADA",
                     LogAuditoria.Resultado.AUTORIZADO, detalle, null);
             return fichada;
