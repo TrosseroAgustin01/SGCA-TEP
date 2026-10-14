@@ -1,5 +1,6 @@
 package com.sgcatep.view;
 
+import com.sgcatep.exception.UsuarioInactivoException;
 import com.sgcatep.model.domain.Usuario;
 import com.sgcatep.model.service.GestorAcceso;
 import javafx.geometry.Insets;
@@ -20,7 +21,7 @@ public class LoginFX {
     public void show(Stage primaryStage) {
         this.stage = primaryStage;
 
-        // ── HEADER ──────────────────────────────────────
+        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -29,7 +30,7 @@ public class LoginFX {
 
         VBox textoHeader = new VBox(2, lblTitulo, lblSub);
 
-        // Ícono simple con texto
+        // agregue con un icono que "representa" el logo del TEP
         Label icono = new Label("⊛");
         icono.setStyle("-fx-text-fill: white; -fx-font-size: 22px;");
 
@@ -38,7 +39,7 @@ public class LoginFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // ── CARD ─────────────────────────────────────────
+        // contenido
         Label cuTag = new Label("CU-05");
         cuTag.getStyleClass().add("cu-tag");
 
@@ -90,7 +91,7 @@ public class LoginFX {
         card.setMaxWidth(380);
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // ── FOOTER ───────────────────────────────────────
+        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -98,23 +99,25 @@ public class LoginFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // ── ENSAMBLADO ───────────────────────────────────
+        // estilos
         StackPane centro = new StackPane(card);
         centro.setPadding(new Insets(40));
         VBox.setVgrow(centro, Priority.ALWAYS);
+        HBox.setHgrow(centro, Priority.ALWAYS);
 
         VBox root = new VBox(header, centro, footerBox);
 
         Scene scene = new Scene(root, 500, 560);
-        scene.getStylesheets().add(
-                getClass().getResource("/styles.css").toExternalForm()
-        );
+        var cssUrl = getClass().getResource("/styles.css");
+        if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 
         stage.setTitle("SGCA-TEP - Login");
         stage.setScene(scene);
-        stage.setResizable(false);
+        stage.setResizable(true);
+        stage.sizeToScene();
         stage.show();
     }
+
 
     private void intentarLogin(TextField txtDni, PasswordField txtPass, Label lblMensaje) {
         String dni = txtDni.getText().trim();
@@ -133,6 +136,9 @@ public class LoginFX {
                 lblMensaje.setText("DNI o contraseña incorrectos.");
                 txtPass.clear();
             }
+        } catch (UsuarioInactivoException ex) {
+            lblMensaje.setText(ex.getMessage());
+            txtPass.clear();
         } catch (SQLException ex) {
             lblMensaje.setText("Error de conexión: " + ex.getMessage());
         }

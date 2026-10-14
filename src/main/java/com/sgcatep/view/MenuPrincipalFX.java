@@ -16,7 +16,7 @@ public class MenuPrincipalFX {
 
     public void show(Stage stage, Usuario usuario) {
 
-        // ── HEADER ──────────────────────────────────────
+        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -33,7 +33,7 @@ public class MenuPrincipalFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // ── CARD ─────────────────────────────────────────
+        // contenido
         String rolesTexto = usuario.getRoles().stream()
                 .map(Rol::getNombre)
                 .reduce((a, b) -> a + ", " + b)
@@ -68,6 +68,9 @@ public class MenuPrincipalFX {
         btnAsignarRoles.setPrefWidth(320);
         btnAsignarRoles.setPrefHeight(42);
         btnAsignarRoles.setDisable(!esAdmin);
+        if (!esAdmin) {
+            btnAsignarRoles.setTooltip(new Tooltip("Requiere rol Administrador"));
+        }
 
         Button btnCerrarSesion = new Button("Cerrar Sesión");
         btnCerrarSesion.getStyleClass().add("btn-peligro");
@@ -83,7 +86,7 @@ public class MenuPrincipalFX {
             AsignarRolesFX asignar = new AsignarRolesFX();
             asignar.show(stage, usuario);
         });
-
+        
         btnCerrarSesion.setOnAction(e -> {
             ConexionDB.closeConnection();
             LoginFX login = new LoginFX();
@@ -100,7 +103,7 @@ public class MenuPrincipalFX {
         card.setMaxWidth(400);
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // ── FOOTER ───────────────────────────────────────
+        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -108,14 +111,14 @@ public class MenuPrincipalFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // ── ENSAMBLADO ───────────────────────────────────
+        // estilos
         StackPane centro = new StackPane(card);
         centro.setPadding(new Insets(40));
         VBox.setVgrow(centro, Priority.ALWAYS);
 
         VBox root = new VBox(header, centro, footerBox);
 
-        Scene scene = new Scene(root, 500, 480);
+        Scene scene = new Scene(root, 500, 580);
         var cssUrl = getClass().getResource("/styles.css");
         if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 

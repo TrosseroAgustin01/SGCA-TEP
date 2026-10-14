@@ -21,7 +21,7 @@ public class FichadaFX {
 
     public void show(Stage stage, Usuario usuario) {
 
-        // ── HEADER ──────────────────────────────────────
+        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -38,7 +38,7 @@ public class FichadaFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // ── CARD ─────────────────────────────────────────
+        // contenido
         Label cuTag = new Label("CU-04");
         cuTag.getStyleClass().add("cu-tag");
 
@@ -52,7 +52,7 @@ public class FichadaFX {
         Separator sep1 = new Separator();
         sep1.setPadding(new Insets(4, 0, 4, 0));
 
-        // Info del usuario en grilla
+        // grilla con los datos del usuario
         Label hdrUsuario = new Label("USUARIO");
         hdrUsuario.setStyle("-fx-font-size: 10px; -fx-text-fill: #888888; -fx-font-weight: bold;");
         Label valUsuario = new Label(usuario.getNombre() + " " + usuario.getApellido());
@@ -72,7 +72,7 @@ public class FichadaFX {
         Separator sep2 = new Separator();
         sep2.setPadding(new Insets(4, 0, 4, 0));
 
-        // Tipo
+        // entrada/salida
         Label lblTipo = new Label("Tipo de acceso:");
         lblTipo.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
         ComboBox<String> cmbTipo = new ComboBox<>();
@@ -81,7 +81,7 @@ public class FichadaFX {
         cmbTipo.setPrefWidth(320);
         cmbTipo.getStyleClass().add("combo-box");
 
-        // Modalidad
+        // presencial/remoto
         Label lblModalidad = new Label("Modalidad:");
         lblModalidad.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
         ComboBox<String> cmbModalidad = new ComboBox<>();
@@ -90,7 +90,7 @@ public class FichadaFX {
         cmbModalidad.setPrefWidth(320);
         cmbModalidad.getStyleClass().add("combo-box");
 
-        // Aviso remota
+        // alerta de que revisamos si cuenta con autorizacion para trabajar remoto
         Label lblAviso = new Label("La autorización de trabajo remoto se validará automáticamente.");
         lblAviso.setStyle("-fx-text-fill: #1565c0; -fx-font-size: 12px; "
                 + "-fx-background-color: #e3f2fd; -fx-padding: 8px 12px; "
@@ -109,7 +109,7 @@ public class FichadaFX {
         lblMensaje.setWrapText(true);
         lblMensaje.setMaxWidth(320);
 
-        // Botones
+        // botones
         Button btnCancelar = new Button("CANCELAR");
         btnCancelar.getStyleClass().add("btn-secundario");
         btnCancelar.setPrefHeight(40);
@@ -164,7 +164,7 @@ public class FichadaFX {
         card.setMaxWidth(420);
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // ── FOOTER ───────────────────────────────────────
+        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -172,7 +172,7 @@ public class FichadaFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // ── ENSAMBLADO ───────────────────────────────────
+        // estilos
         StackPane centro = new StackPane(card);
         centro.setPadding(new Insets(30));
         VBox.setVgrow(centro, Priority.ALWAYS);

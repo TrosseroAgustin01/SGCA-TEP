@@ -73,7 +73,7 @@ public class UsuarioRepository extends BaseRepository {
 
     public Usuario autenticar(String dni, String contraseñaPlana) throws SQLException {
         String contraseñaHash = hashearContraseña(contraseñaPlana);
-        String sql = "SELECT * FROM USUARIO WHERE dni = ? AND contraseña = ? AND activo = TRUE";
+        String sql = "SELECT * FROM USUARIO WHERE dni = ? AND contraseña = ?";
         Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -250,6 +250,28 @@ public class UsuarioRepository extends BaseRepository {
     private void cargarRoles(Usuario usuario) throws SQLException {
         List<Rol> roles = rolRepository.listarRolesDeUsuario(usuario.getIdUsuario());
         usuario.setRoles(roles);
+    }
+
+    public List<String> listarRolesConArea(int idUsuario) throws SQLException {
+        List<String> roles = new ArrayList<>();
+        String sql = "SELECT r.nombre_rol, a.nombre_area " +
+                "FROM USUARIO_ROL ur " +
+                "JOIN ROL r ON r.id_rol = ur.id_rol " +
+                "JOIN AREA a ON a.id_area = ur.id_area " +
+                "WHERE ur.id_usuario = ? AND r.activo = TRUE " +
+                "ORDER BY r.nombre_rol, a.nombre_area";
+        Connection conn = ConexionDB.getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    roles.add(rs.getString("nombre_rol") + " — " + rs.getString("nombre_area"));
+                }
+            }
+        }
+        return roles;
     }
 
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
