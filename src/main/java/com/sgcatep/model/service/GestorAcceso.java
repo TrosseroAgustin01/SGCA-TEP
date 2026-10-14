@@ -157,7 +157,6 @@ public class GestorAcceso {
             conn.setAutoCommit(true);
         }
 
-        // El rechazo se registra fuera de la transacción: si fuera dentro, el rollback borraría el log
         if (!quitado) {
             logRepository.registrarRechazo(admin, "DESASIGNACION_ROL", "ROL_NO_ASIGNADO",
                     "Destino: " + destino.getIdUsuario() + ", Rol: " + rol.getNombre()
