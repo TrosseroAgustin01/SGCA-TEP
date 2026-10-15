@@ -82,10 +82,20 @@ public class MenuPrincipalFX {
             fichada.show(stage, usuario);
         });
 
+        Button btnSolicitarAcceso = new Button("Solicitar Acceso a Sistema");
+        btnSolicitarAcceso.getStyleClass().add("btn-primario");
+        btnSolicitarAcceso.setPrefWidth(320);
+        btnSolicitarAcceso.setPrefHeight(42);
+        btnSolicitarAcceso.setOnAction(e -> {
+            SolicitarAccesoFX vista = new SolicitarAccesoFX();
+            vista.show(stage, usuario);
+        });
+
         btnAsignarRoles.setOnAction(e -> {
             AsignarRolesFX asignar = new AsignarRolesFX();
             asignar.show(stage, usuario);
         });
+
         
         btnCerrarSesion.setOnAction(e -> {
             ConexionDB.closeConnection();
@@ -93,11 +103,12 @@ public class MenuPrincipalFX {
             login.show(stage);
         });
 
+
         VBox card = new VBox(12,
                 cardTitulo,
                 lblUsuario, lblArea, lblRol,
                 sep,
-                btnFichada, btnAsignarRoles, btnCerrarSesion
+                btnFichada, btnAsignarRoles, btnSolicitarAcceso, btnCerrarSesion
         );
         card.getStyleClass().add("card");
         card.setMaxWidth(400);

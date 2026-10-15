@@ -3,10 +3,12 @@ package com.sgcatep.view;
 import com.sgcatep.exception.AsignacionRolException;
 import com.sgcatep.model.domain.Area;
 import com.sgcatep.model.domain.Rol;
+import com.sgcatep.model.domain.Sistema;
 import com.sgcatep.model.domain.Usuario;
 import com.sgcatep.model.repository.AreaRepository;
 import com.sgcatep.model.repository.RolRepository;
 import com.sgcatep.model.repository.UsuarioRepository;
+import com.sgcatep.model.repository.SistemaRepository;
 import com.sgcatep.model.service.GestorAcceso;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -25,6 +27,7 @@ public class AsignarRolesFX {
     private final UsuarioRepository usuarioRepository = new UsuarioRepository();
     private final RolRepository rolRepository = new RolRepository();
     private final AreaRepository areaRepository = new AreaRepository();
+    private final SistemaRepository sistemaRepository = new SistemaRepository();
     private final GestorAcceso gestorAcceso = new GestorAcceso();
 
     public void show(Stage stage, Usuario adminLogueado) {
@@ -76,6 +79,12 @@ public class AsignarRolesFX {
         listaRolesActuales.setPrefHeight(110);
         listaRolesActuales.setPlaceholder(new Label("Sin roles asignados"));
 
+        Label lblSistemasAcceso = new Label("Sistemas accesibles por el usuario:");
+        lblSistemasAcceso.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
+        ListView<String> listaSistemasAcceso = new ListView<>();
+        listaSistemasAcceso.setPrefHeight(90);
+        listaSistemasAcceso.setPlaceholder(new Label("Sin sistemas accesibles"));
+
         Label lblAreaSel = new Label("Área de trabajo:");
         lblAreaSel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
         ComboBox<String> cmbArea = new ComboBox<>();
@@ -110,8 +119,10 @@ public class AsignarRolesFX {
             lblMensaje.setText("Error cargando datos: " + ex.getMessage());
         }
 
-        cmbUsuario.valueProperty().addListener((obs, anterior, nuevo) ->
-                cargarRolesActuales(listaRolesActuales, nuevo, lblMensaje));
+        cmbUsuario.valueProperty().addListener((obs, anterior, nuevo) -> {
+            cargarRolesActuales(listaRolesActuales, nuevo, lblMensaje);
+            cargarSistemasAcceso(listaSistemasAcceso, nuevo, lblMensaje);
+        });
 
         // botones
         Button btnCancelar = new Button("CANCELAR");
@@ -152,6 +163,7 @@ public class AsignarRolesFX {
                 mostrarResultado(lblMensaje, true, "✓ Rol '" + rolSel.getNombre()
                         + "' asignado a " + usuarioSel.getNombre() + " correctamente.");
                 cargarRolesActuales(listaRolesActuales, cmbUsuario.getValue(), lblMensaje);
+                cargarSistemasAcceso(listaSistemasAcceso, cmbUsuario.getValue(), lblMensaje);
             } catch (AsignacionRolException ex) {
                 mostrarResultado(lblMensaje, false, "✗ " + ex.getMessage());
             } catch (SQLException ex) {
@@ -185,6 +197,7 @@ public class AsignarRolesFX {
                 mostrarResultado(lblMensaje, true, "✓ Rol '" + rolSel.getNombre()
                         + "' quitado correctamente.");
                 cargarRolesActuales(listaRolesActuales, cmbUsuario.getValue(), lblMensaje);
+                cargarSistemasAcceso(listaSistemasAcceso, cmbUsuario.getValue(), lblMensaje);
             } catch (AsignacionRolException ex) {
                 mostrarResultado(lblMensaje, false, "✗ " + ex.getMessage());
             } catch (SQLException ex) {
@@ -201,6 +214,7 @@ public class AsignarRolesFX {
                 cuTag, cardTitulo, cardSub, lblAdmin, sep1,
                 lblUsuarioSel, cmbUsuario,
                 lblRolesActuales, listaRolesActuales,
+                lblSistemasAcceso, listaSistemasAcceso,
                 lblAreaSel, cmbArea,
                 lblRolSel, cmbRol,
                 lblMensaje,
@@ -250,6 +264,22 @@ public class AsignarRolesFX {
         } catch (SQLException ex) {
             lblMensaje.getStyleClass().setAll("msg-error");
             lblMensaje.setText("Error cargando roles del usuario: " + ex.getMessage());
+        }
+    }
+
+    private void cargarSistemasAcceso(ListView<String> lista, String seleccion, Label lblMensaje) {
+        lista.getItems().clear();
+        if (seleccion == null) {
+            return;
+        }
+        try {
+            int idUsuario = extraerId(seleccion);
+            for (Sistema s : sistemaRepository.listarSistemasDeUsuario(idUsuario)) {
+                lista.getItems().add(s.getNombre());
+            }
+        } catch (SQLException ex) {
+            lblMensaje.getStyleClass().setAll("msg-error");
+            lblMensaje.setText("Error cargando sistemas: " + ex.getMessage());
         }
     }
 

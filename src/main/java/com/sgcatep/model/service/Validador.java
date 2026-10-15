@@ -7,6 +7,7 @@ import com.sgcatep.model.repository.AutorizacionRemotaRepository;
 import com.sgcatep.model.repository.FichadaRepository;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 public class Validador {
 
@@ -31,7 +32,11 @@ public class Validador {
         if (usuario == null) {
             return false;
         }
-        return fichadaRepository.tieneEntradaHoy(usuario.getIdUsuario());
+        return fichadaRepository.listarPorUsuarioYFecha(usuario.getIdUsuario(), LocalDate.now())
+                .stream()
+                .reduce((primera, segunda) -> segunda)
+                .map(ultima -> ultima.esTipoEntrada() && ultima.esVigente())
+                .orElse(false);
     }
 
     public boolean verificarAutorizacionRemota(Usuario usuario) throws SQLException {

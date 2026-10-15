@@ -124,9 +124,11 @@ public class SistemaRepository extends BaseRepository {
         String sql = "SELECT DISTINCT s.* " +
                 "FROM SISTEMA s " +
                 "JOIN PERMISO_SISTEMA ps ON s.id_sistema = ps.id_sistema " +
-                "JOIN ROL_PERMISO rp ON ps.id_permiso = rp.id_permiso " +
-                "JOIN USUARIO_ROL ur ON rp.id_rol = ur.id_rol " +
-                "WHERE ur.id_usuario = ? AND s.activo = TRUE " +
+                "JOIN PERMISO p ON p.id_permiso = ps.id_permiso " +
+                "JOIN ROL_PERMISO rp ON rp.id_permiso = p.id_permiso " +
+                "JOIN ROL r ON r.id_rol = rp.id_rol " +
+                "JOIN USUARIO_ROL ur ON ur.id_rol = r.id_rol " +
+                "WHERE ur.id_usuario = ? AND s.activo = TRUE AND p.activo = TRUE AND r.activo = TRUE " +
                 "ORDER BY s.nombre_sistema";
 
         Connection conn = getConnection();
