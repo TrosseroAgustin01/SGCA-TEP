@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class UsuarioRepository extends BaseRepository {
@@ -140,6 +141,36 @@ public class UsuarioRepository extends BaseRepository {
             }
         }
         return usuarios;
+    }
+
+    public List<Integer> listarAreasConPermisos(int idUsuario, String... permisos) throws SQLException {
+        List<Integer> areas = new ArrayList<>();
+        String marcas = String.join(",", Collections.nCopies(permisos.length, "?"));
+        String sql = """
+            SELECT ur.id_area
+            FROM USUARIO_ROL ur
+            JOIN ROL_PERMISO rp ON rp.id_rol = ur.id_rol
+            JOIN PERMISO p ON p.id_permiso = rp.id_permiso
+            WHERE ur.id_usuario = ? AND p.activo = TRUE AND p.nombre_permiso IN (%s)
+            GROUP BY ur.id_area
+            HAVING COUNT(DISTINCT p.nombre_permiso) = ?
+            """.formatted(marcas);
+        Connection conn = getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            for (int i = 0; i < permisos.length; i++) {
+                stmt.setString(i + 2, permisos[i]);
+            }
+            stmt.setInt(permisos.length + 2, permisos.length);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    areas.add(rs.getInt("id_area"));
+                }
+            }
+        }
+        return areas;
     }
 
     public int insertar(Usuario usuario) throws SQLException {

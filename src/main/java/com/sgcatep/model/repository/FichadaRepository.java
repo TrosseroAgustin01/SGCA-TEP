@@ -9,6 +9,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FichadaRepository extends BaseRepository {
@@ -92,6 +93,34 @@ public class FichadaRepository extends BaseRepository {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idArea);
 
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    fichadas.add(mapearFichada(rs));
+                }
+            }
+        }
+        return fichadas;
+    }
+
+    public List<Fichada> listarPorAreas(List<Integer> areas) throws SQLException {
+        List<Fichada> fichadas = new ArrayList<>();
+        if (areas.isEmpty()) {
+            return fichadas;
+        }
+        String marcas = String.join(",",    Collections.nCopies(areas.size(), "?"));
+        String sql = """
+            SELECT DISTINCT f.*
+            FROM FICHADA f
+            JOIN USUARIO_ROL ur ON ur.id_usuario = f.id_usuario
+            WHERE ur.id_area IN (%s)
+            ORDER BY f.fecha_hora DESC
+            """.formatted(marcas);
+        Connection conn = getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            for (int i = 0; i < areas.size(); i++) {
+                stmt.setInt(i + 1, areas.get(i));
+            }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     fichadas.add(mapearFichada(rs));

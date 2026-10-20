@@ -41,6 +41,21 @@ public class AreaRepository extends BaseRepository {
         return null;
     }
 
+    public Area buscarPorCodigo(String codigo) throws SQLException {
+        String sql = "SELECT * FROM AREA WHERE codigo_area = ?";
+        Connection conn = getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, codigo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearArea(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Area> listarTodas() throws SQLException {
         List<Area> areas = new ArrayList<>();
         String sql = "SELECT * FROM AREA ORDER BY nombre_area";

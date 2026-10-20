@@ -103,12 +103,17 @@ public class MenuPrincipalFX {
             login.show(stage);
         });
 
+        Button btnConsulta = new Button("Consultar fichadas");
+        btnConsulta.getStyleClass().add("btn-primario");
+        btnConsulta.setPrefWidth(320);
+        btnConsulta.setPrefHeight(42);
+        btnConsulta.setOnAction(e -> new ConsultaFichadasFX().show(stage, usuario));
 
         VBox card = new VBox(12,
                 cardTitulo,
                 lblUsuario, lblArea, lblRol,
                 sep,
-                btnFichada, btnAsignarRoles, btnSolicitarAcceso, btnCerrarSesion
+                btnFichada, btnAsignarRoles, btnSolicitarAcceso, btnConsulta, btnCerrarSesion
         );
         card.getStyleClass().add("card");
         card.setMaxWidth(400);
