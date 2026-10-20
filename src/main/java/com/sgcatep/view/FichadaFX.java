@@ -1,6 +1,6 @@
 package com.sgcatep.view;
 
-import com.sgcatep.model.domain.Fichada;
+import com.sgcatep.controller.FichadaController;
 import com.sgcatep.model.domain.Usuario;
 import com.sgcatep.model.service.GestorFichada;
 import javafx.geometry.Insets;
@@ -13,11 +13,11 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
 
 public class FichadaFX {
 
     private final GestorFichada gestorFichada = new GestorFichada();
+    private final FichadaController controller = new FichadaController();
 
     public void show(Stage stage, Usuario usuario) {
 
@@ -123,23 +123,10 @@ public class FichadaFX {
 
         btnRegistrar.setOnAction(e -> {
             try {
-                Fichada.Tipo tipo = Fichada.Tipo.valueOf(cmbTipo.getValue());
-                Fichada.Modalidad modalidad = Fichada.Modalidad.valueOf(cmbModalidad.getValue());
-
-                Fichada fichada = gestorFichada.registrarFichada(usuario, tipo, modalidad);
-
-                if (fichada != null) {
-                    String hora = fichada.getFechaHora()
-                            .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                    lblMensaje.getStyleClass().setAll("msg-exito");
-                    lblMensaje.setText("✓ Fichada registrada — Tipo: " + tipo
-                            + " | Modalidad: " + modalidad + " | Hora: " + hora);
-                } else {
-                    lblMensaje.getStyleClass().setAll("msg-error");
-                    lblMensaje.setText("✗ " + (modalidad == Fichada.Modalidad.REMOTA
-                            ? "No posee autorización remota vigente."
-                            : "No se pudo registrar la fichada."));
-                }
+                FichadaController.Resultado r = controller.registrar(
+                        usuario, cmbTipo.getValue(), cmbModalidad.getValue());
+                lblMensaje.getStyleClass().setAll(r.registrada() ? "msg-exito" : "msg-error");
+                lblMensaje.setText(r.mensaje());
             } catch (SQLException ex) {
                 lblMensaje.getStyleClass().setAll("msg-error");
                 lblMensaje.setText("Error: " + ex.getMessage());

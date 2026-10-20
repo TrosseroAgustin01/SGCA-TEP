@@ -1,9 +1,8 @@
 package com.sgcatep.view;
 
+import com.sgcatep.controller.AccesoController;
 import com.sgcatep.model.domain.Sistema;
 import com.sgcatep.model.domain.Usuario;
-import com.sgcatep.model.repository.SistemaRepository;
-import com.sgcatep.model.service.GestorAcceso;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,13 +13,12 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class SolicitarAccesoFX {
 
-    private final SistemaRepository sistemaRepository = new SistemaRepository();
-    private final GestorAcceso gestorAcceso = new GestorAcceso();
+    private final AccesoController controller = new AccesoController();
 
     public void show(Stage stage, Usuario usuario) {
 
@@ -72,8 +70,10 @@ public class SolicitarAccesoFX {
         Label lblMensaje = new Label();
         lblMensaje.setWrapText(true);
 
+        // combo y lista van en el mismo orden, así uso el índice
+        final List<Sistema> sistemas = new ArrayList<>();
         try {
-            List<Sistema> sistemas = sistemaRepository.listarActivos();
+            sistemas.addAll(controller.listarSistemasActivos());
             for (Sistema s : sistemas) {
                 cmbSistema.getItems().add(s.getIdSistema() + " - " + s.getNombre());
             }
@@ -96,22 +96,17 @@ public class SolicitarAccesoFX {
         botonesBox.setAlignment(Pos.CENTER_RIGHT);
 
         btnSolicitar.setOnAction(e -> {
-            if (cmbSistema.getValue() == null) {
+            int idx = cmbSistema.getSelectionModel().getSelectedIndex();
+            if (idx < 0) {
                 lblMensaje.getStyleClass().setAll("msg-error");
                 lblMensaje.setText("Debe seleccionar un sistema.");
                 return;
             }
             try {
-                int idSistema = extraerId(cmbSistema.getValue());
-                Sistema sistema = sistemaRepository.buscarPorId(idSistema);
-
-                Map<String, Object> resultado = gestorAcceso.solicitarAcceso(usuario, sistema);
-                boolean autorizado = (boolean) resultado.get("autorizado");
-                String motivo = (String) resultado.get("motivo");
-
-                lblMensaje.getStyleClass().setAll(autorizado ? "msg-exito" : "msg-error");
-                lblMensaje.setText((autorizado ? "✓ ACCESO AUTORIZADO" : "✗ ACCESO DENEGADO")
-                        + " — " + motivo + "\nSistema: " + sistema.getNombre());
+                AccesoController.Resultado r = controller.solicitarAcceso(usuario, sistemas.get(idx));
+                lblMensaje.getStyleClass().setAll(r.autorizado() ? "msg-exito" : "msg-error");
+                lblMensaje.setText((r.autorizado() ? "✓ ACCESO AUTORIZADO" : "✗ ACCESO DENEGADO")
+                        + " — " + r.motivo() + "\nSistema: " + r.sistema().getNombre());
             } catch (SQLException ex) {
                 lblMensaje.getStyleClass().setAll("msg-error");
                 lblMensaje.setText("Error de base de datos: " + ex.getMessage());
@@ -158,9 +153,5 @@ public class SolicitarAccesoFX {
         stage.setTitle("SGCA-TEP - Solicitar Acceso");
         stage.setScene(scene);
         stage.setResizable(true);
-    }
-
-    private int extraerId(String seleccion) {
-        return Integer.parseInt(seleccion.split(" - ")[0].trim());
     }
 }
