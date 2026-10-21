@@ -213,4 +213,43 @@ public class LogAuditoriaRepository extends BaseRepository {
                 rs.getString("direccion_ip")
         );
     }
+
+    public int contarVisibles(String condicion, List<Object> params) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM LOG_AUDITORIA l WHERE " + condicion;
+        Connection conn = getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            cargarParametros(stmt, params);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
+        }
+    }
+
+    public List<LogAuditoria> listarVisibles(String condicion, List<Object> params,
+                                             int offset, int limit) throws SQLException {
+        List<LogAuditoria> logs = new ArrayList<>();
+        String sql = "SELECT * FROM LOG_AUDITORIA l WHERE " + condicion
+                + " ORDER BY l.fecha_hora DESC, l.id_log DESC LIMIT ? OFFSET ?";
+        Connection conn = getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            cargarParametros(stmt, params);
+            stmt.setInt(params.size() + 1, limit);
+            stmt.setInt(params.size() + 2, offset);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    logs.add(mapearLog(rs));
+                }
+            }
+        }
+        return logs;
+    }
+
+    private void cargarParametros(PreparedStatement stmt, List<Object> params) throws SQLException {
+        for (int i = 0; i < params.size(); i++) {
+            stmt.setObject(i + 1, params.get(i));
+        }
+    }
 }

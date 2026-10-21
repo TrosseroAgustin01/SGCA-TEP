@@ -109,11 +109,17 @@ public class MenuPrincipalFX {
         btnConsulta.setPrefHeight(42);
         btnConsulta.setOnAction(e -> new ConsultaFichadasFX().show(stage, usuario));
 
+        Button btnAuditoria = new Button("Consultar auditoría");
+        btnAuditoria.getStyleClass().add("btn-primario");
+        btnAuditoria.setPrefWidth(320);
+        btnAuditoria.setPrefHeight(42);
+        btnAuditoria.setOnAction(e -> new ConsultaAuditoriaFX().show(stage, usuario));
+
         VBox card = new VBox(12,
                 cardTitulo,
                 lblUsuario, lblArea, lblRol,
                 sep,
-                btnFichada, btnAsignarRoles, btnSolicitarAcceso, btnConsulta, btnCerrarSesion
+                btnFichada, btnAsignarRoles, btnSolicitarAcceso, btnConsulta, btnAuditoria, btnCerrarSesion
         );
         card.getStyleClass().add("card");
         card.setMaxWidth(400);

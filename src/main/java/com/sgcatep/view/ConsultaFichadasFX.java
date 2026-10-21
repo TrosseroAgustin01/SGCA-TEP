@@ -11,6 +11,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.beans.binding.Bindings;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class ConsultaFichadasFX {
     private static final String TODAS = "Todas";
 
     private final ConsultaController controller = new ConsultaController();
+    private Scene escena;
 
     public void show(Stage stage, Usuario usuario) {
 
@@ -77,7 +79,7 @@ public class ConsultaFichadasFX {
         cmbArea.setPrefWidth(320);
         cmbArea.getStyleClass().add("combo-box");
 
-        HBox filtros = new HBox(12, lblArea, cmbArea);
+        HBox filtros = new HBox(16, lblArea, cmbArea);
         filtros.setAlignment(Pos.CENTER_LEFT);
 
         Label lblCantidad = new Label();
@@ -100,23 +102,22 @@ public class ConsultaFichadasFX {
         };
 
         cmbArea.valueProperty().addListener((obs, anterior, nuevo) -> refrescar.run());
-        refrescar.run();
 
         Button btnVolver = new Button("VOLVER");
         btnVolver.getStyleClass().add("btn-secundario");
-        btnVolver.setPrefHeight(40);
+        btnVolver.setPrefHeight(46);
         btnVolver.setMinWidth(Region.USE_PREF_SIZE);
 
-        HBox botonesBox = new HBox(12, btnVolver);
+        HBox botonesBox = new HBox(16, btnVolver);
         botonesBox.setAlignment(Pos.CENTER_RIGHT);
 
         btnVolver.setOnAction(e -> new MenuPrincipalFX().show(stage, usuario));
 
-        VBox card = new VBox(12,
+        VBox card = new VBox(18,
                 cuTag, cardTitulo, lblAlcance, filtros, lblCantidad,
                 paginacion, lblMensaje, botonesBox);
         card.getStyleClass().add("card");
-        card.setMaxWidth(560);
+        card.setPadding(new Insets(28));
         card.setAlignment(Pos.CENTER_LEFT);
 
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
@@ -136,19 +137,25 @@ public class ConsultaFichadasFX {
         VBox root = new VBox(header, scroll, footerBox);
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        Scene scene = new Scene(root, 640, 660);
+        escena = new Scene(root, 640, 660);
         var cssUrl = getClass().getResource("/styles.css");
-        if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
+        if (cssUrl != null) escena.getStylesheets().add(cssUrl.toExternalForm());
+
+        card.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(560, scroll.getWidth() * 0.6), scroll.widthProperty()));
+        paginacion.prefHeightProperty().bind(escena.heightProperty().multiply(0.5));
+
+        refrescar.run();
 
         stage.setTitle("SGCA-TEP - Consulta de Fichadas");
-        stage.setScene(scene);
+        stage.setScene(escena);
         stage.setResizable(true);
     }
 
     private ListView<String> crearPagina(List<Fichada> lista, int pagina) {
         ListView<String> vista = new ListView<>();
-        vista.setPrefHeight(300);
         vista.setPlaceholder(new Label("Sin fichadas para mostrar"));
+        vista.prefHeightProperty().bind(escena.heightProperty().multiply(0.45));
         lista.stream().skip((long) pagina * TAMANIO).limit(TAMANIO)
                 .map(ConsultaController::linea)
                 .forEach(vista.getItems()::add);
