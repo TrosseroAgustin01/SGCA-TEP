@@ -4,6 +4,7 @@ import com.sgcatep.controller.AsignacionController;
 import com.sgcatep.model.domain.Area;
 import com.sgcatep.model.domain.Rol;
 import com.sgcatep.model.domain.Usuario;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -23,7 +24,6 @@ public class AsignarRolesFX {
 
     public void show(Stage stage, Usuario adminLogueado) {
 
-        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -40,7 +40,6 @@ public class AsignarRolesFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // contenido
         Label cuTag = new Label("CU-02 · VISTA ADMINISTRADOR");
         cuTag.getStyleClass().add("cu-tag");
 
@@ -91,7 +90,6 @@ public class AsignarRolesFX {
         Label lblMensaje = new Label();
         lblMensaje.setWrapText(true);
 
-        // listas paralelas a los combos, se usa el índice seleccionado
         List<Usuario> usuarios = new ArrayList<>();
         List<Area> areas = new ArrayList<>();
         List<Rol> roles = new ArrayList<>();
@@ -117,23 +115,22 @@ public class AsignarRolesFX {
         cmbUsuario.getSelectionModel().selectedIndexProperty().addListener((obs, viejo, nuevo) ->
                 cargarUsuario(nuevo.intValue(), usuarios, listaRolesActuales, listaSistemasAcceso, lblMensaje));
 
-        // botones
         Button btnCancelar = new Button("CANCELAR");
         btnCancelar.getStyleClass().add("btn-secundario");
-        btnCancelar.setPrefHeight(40);
+        btnCancelar.setPrefHeight(44);
         btnCancelar.setMinWidth(Region.USE_PREF_SIZE);
 
         Button btnAsignar = new Button("GUARDAR ASIGNACIÓN");
         btnAsignar.getStyleClass().add("btn-primario");
-        btnAsignar.setPrefHeight(40);
+        btnAsignar.setPrefHeight(44);
         btnAsignar.setMinWidth(Region.USE_PREF_SIZE);
 
         Button btnQuitar = new Button("QUITAR ROL");
         btnQuitar.getStyleClass().add("btn-secundario");
-        btnQuitar.setPrefHeight(40);
+        btnQuitar.setPrefHeight(44);
         btnQuitar.setMinWidth(Region.USE_PREF_SIZE);
 
-        HBox botonesBox = new HBox(12, btnCancelar, btnQuitar, btnAsignar);
+        HBox botonesBox = new HBox(14, btnCancelar, btnQuitar, btnAsignar);
         botonesBox.setAlignment(Pos.CENTER_RIGHT);
 
         btnAsignar.setOnAction(e -> {
@@ -168,12 +165,9 @@ public class AsignarRolesFX {
             }
         });
 
-        btnCancelar.setOnAction(e -> {
-            MenuPrincipalFX menu = new MenuPrincipalFX();
-            menu.show(stage, adminLogueado);
-        });
+        btnCancelar.setOnAction(e -> new MenuPrincipalFX().show(stage, adminLogueado));
 
-        VBox card = new VBox(12,
+        VBox card = new VBox(15,
                 cuTag, cardTitulo, cardSub, lblAdmin, sep1,
                 lblUsuarioSel, cmbUsuario,
                 lblRolesActuales, listaRolesActuales,
@@ -184,10 +178,9 @@ public class AsignarRolesFX {
                 botonesBox
         );
         card.getStyleClass().add("card");
-        card.setMaxWidth(560);
+        card.setPadding(new Insets(24));
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -195,13 +188,14 @@ public class AsignarRolesFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // estilos
         StackPane centro = new StackPane(card);
         centro.setPadding(new Insets(30));
 
         ScrollPane scroll = new ScrollPane(centro);
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: #eef2f7; -fx-background: #eef2f7;");
+
+        Escala.ajustarCard(card, scroll);
 
         VBox root = new VBox(header, scroll, footerBox);
         VBox.setVgrow(scroll, Priority.ALWAYS);

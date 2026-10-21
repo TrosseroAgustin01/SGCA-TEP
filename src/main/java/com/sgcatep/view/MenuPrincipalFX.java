@@ -3,6 +3,7 @@ package com.sgcatep.view;
 import com.sgcatep.ConexionDB;
 import com.sgcatep.model.domain.Rol;
 import com.sgcatep.model.domain.Usuario;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,7 +17,6 @@ public class MenuPrincipalFX {
 
     public void show(Stage stage, Usuario usuario) {
 
-        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -33,99 +33,82 @@ public class MenuPrincipalFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // contenido
         String rolesTexto = usuario.getRoles().stream()
                 .map(Rol::getNombre)
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("Sin rol asignado");
 
+        Label etiquetaPerfil = new Label("PERFIL");
+        etiquetaPerfil.setStyle("-fx-font-size: 10px; -fx-text-fill: #888888; -fx-font-weight: bold;");
+
+        Label lblUsuario = new Label(usuario.getNombre() + " " + usuario.getApellido());
+        lblUsuario.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1b3a5c;");
+        lblUsuario.setWrapText(true);
+
+        Label lblArea = new Label("Área: " + usuario.getArea().getNombre());
+        lblArea.setStyle("-fx-font-size: 13px; -fx-text-fill: #333333;");
+        lblArea.setWrapText(true);
+
+        Label lblRol = new Label("Rol: " + rolesTexto);
+        lblRol.setStyle("-fx-font-size: 13px; -fx-text-fill: #333333;");
+        lblRol.setWrapText(true);
+
+        Region espacio = new Region();
+        VBox.setVgrow(espacio, Priority.ALWAYS);
+
+        Button btnCerrarSesion = boton("Cerrar Sesión", "btn-peligro");
+        btnCerrarSesion.setOnAction(e -> {
+            ConexionDB.closeConnection();
+            new LoginFX().show(stage);
+        });
+
+        VBox perfil = new VBox(12, etiquetaPerfil, lblUsuario, lblArea, lblRol, espacio, btnCerrarSesion);
+        perfil.getStyleClass().add("card");
+        perfil.setPadding(new Insets(24));
+        perfil.setPrefWidth(240);
+        perfil.setMinWidth(220);
+
         Label cardTitulo = new Label("Menú Principal");
         cardTitulo.getStyleClass().add("card-titulo");
         cardTitulo.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
-        Label lblUsuario = new Label("Usuario: " + usuario.getNombre() + " " + usuario.getApellido());
-        lblUsuario.setStyle("-fx-font-size: 13px; -fx-text-fill: #333333;");
+        Label cardSub = new Label("Seleccione una operación para continuar.");
+        cardSub.getStyleClass().add("card-subtitulo");
 
-        Label lblArea = new Label("Área: " + usuario.getArea().getNombre());
-        lblArea.setStyle("-fx-font-size: 13px; -fx-text-fill: #333333;");
+        Button btnFichada = boton("Registrar Fichada", "btn-primario");
+        btnFichada.setOnAction(e -> new FichadaFX().show(stage, usuario));
 
-        Label lblRol = new Label("Rol: " + rolesTexto);
-        lblRol.setStyle("-fx-font-size: 13px; -fx-text-fill: #333333;");
+        Button btnSolicitarAcceso = boton("Solicitar Acceso a Sistema", "btn-primario");
+        btnSolicitarAcceso.setOnAction(e -> new SolicitarAccesoFX().show(stage, usuario));
 
-        Separator sep = new Separator();
-        sep.setPadding(new Insets(4, 0, 8, 0));
+        Button btnConsulta = boton("Consultar fichadas", "btn-primario");
+        btnConsulta.setOnAction(e -> new ConsultaFichadasFX().show(stage, usuario));
 
-        Button btnFichada = new Button("Registrar Fichada");
-        btnFichada.getStyleClass().add("btn-primario");
-        btnFichada.setPrefWidth(320);
-        btnFichada.setPrefHeight(42);
+        Button btnAuditoria = boton("Consultar auditoría", "btn-primario");
+        btnAuditoria.setOnAction(e -> new ConsultaAuditoriaFX().show(stage, usuario));
 
+        Button btnAsignarRoles = boton("Asignar Roles y Permisos", "btn-primario");
+        btnAsignarRoles.setOnAction(e -> new AsignarRolesFX().show(stage, usuario));
         boolean esAdmin = usuario.getRoles().stream()
                 .anyMatch(r -> r.getNombre().equalsIgnoreCase("Administrador"));
-
-        Button btnAsignarRoles = new Button("Asignar Roles y Permisos");
-        btnAsignarRoles.getStyleClass().add("btn-primario");
-        btnAsignarRoles.setPrefWidth(320);
-        btnAsignarRoles.setPrefHeight(42);
         btnAsignarRoles.setDisable(!esAdmin);
         if (!esAdmin) {
             btnAsignarRoles.setTooltip(new Tooltip("Requiere rol Administrador"));
         }
 
-        Button btnCerrarSesion = new Button("Cerrar Sesión");
-        btnCerrarSesion.getStyleClass().add("btn-peligro");
-        btnCerrarSesion.setPrefWidth(320);
-        btnCerrarSesion.setPrefHeight(42);
+        VBox acciones = new VBox(24,
+                cardTitulo, cardSub,
+                seccion("Presencia y acceso", grilla(btnFichada, btnSolicitarAcceso)),
+                seccion("Consultas", grilla(btnConsulta, btnAuditoria)),
+                seccion("Administración", grilla(btnAsignarRoles)));
+        acciones.getStyleClass().add("card");
+        acciones.setPadding(new Insets(24));
+        HBox.setHgrow(acciones, Priority.ALWAYS);
 
-        btnFichada.setOnAction(e -> {
-            FichadaFX fichada = new FichadaFX();
-            fichada.show(stage, usuario);
-        });
+        HBox contenido = new HBox(24, perfil, acciones);
+        contenido.setAlignment(Pos.TOP_CENTER);
+        contenido.setMaxWidth(Region.USE_PREF_SIZE);
 
-        Button btnSolicitarAcceso = new Button("Solicitar Acceso a Sistema");
-        btnSolicitarAcceso.getStyleClass().add("btn-primario");
-        btnSolicitarAcceso.setPrefWidth(320);
-        btnSolicitarAcceso.setPrefHeight(42);
-        btnSolicitarAcceso.setOnAction(e -> {
-            SolicitarAccesoFX vista = new SolicitarAccesoFX();
-            vista.show(stage, usuario);
-        });
-
-        btnAsignarRoles.setOnAction(e -> {
-            AsignarRolesFX asignar = new AsignarRolesFX();
-            asignar.show(stage, usuario);
-        });
-
-        
-        btnCerrarSesion.setOnAction(e -> {
-            ConexionDB.closeConnection();
-            LoginFX login = new LoginFX();
-            login.show(stage);
-        });
-
-        Button btnConsulta = new Button("Consultar fichadas");
-        btnConsulta.getStyleClass().add("btn-primario");
-        btnConsulta.setPrefWidth(320);
-        btnConsulta.setPrefHeight(42);
-        btnConsulta.setOnAction(e -> new ConsultaFichadasFX().show(stage, usuario));
-
-        Button btnAuditoria = new Button("Consultar auditoría");
-        btnAuditoria.getStyleClass().add("btn-primario");
-        btnAuditoria.setPrefWidth(320);
-        btnAuditoria.setPrefHeight(42);
-        btnAuditoria.setOnAction(e -> new ConsultaAuditoriaFX().show(stage, usuario));
-
-        VBox card = new VBox(12,
-                cardTitulo,
-                lblUsuario, lblArea, lblRol,
-                sep,
-                btnFichada, btnAsignarRoles, btnSolicitarAcceso, btnConsulta, btnAuditoria, btnCerrarSesion
-        );
-        card.getStyleClass().add("card");
-        card.setMaxWidth(400);
-        card.setAlignment(Pos.CENTER_LEFT);
-
-        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -133,18 +116,59 @@ public class MenuPrincipalFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // estilos
-        StackPane centro = new StackPane(card);
-        centro.setPadding(new Insets(40));
-        VBox.setVgrow(centro, Priority.ALWAYS);
+        StackPane centro = new StackPane(contenido);
+        centro.setPadding(new Insets(30));
 
-        VBox root = new VBox(header, centro, footerBox);
+        ScrollPane scroll = new ScrollPane(centro);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background-color: #eef2f7; -fx-background: #eef2f7;");
 
-        Scene scene = new Scene(root, 500, 580);
+        contenido.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.min(1040, Math.max(760, scroll.getWidth() * 0.85)), scroll.widthProperty()));
+
+        VBox root = new VBox(header, scroll, footerBox);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+
+        Scene scene = new Scene(root, 900, 640);
         var cssUrl = getClass().getResource("/styles.css");
         if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 
         stage.setTitle("SGCA-TEP - Menú Principal");
         stage.setScene(scene);
+        stage.setResizable(true);
+    }
+
+    private Button boton(String texto, String estilo) {
+        Button b = new Button(texto);
+        b.getStyleClass().add(estilo);
+        b.setPrefHeight(44);
+        b.setMaxWidth(Double.MAX_VALUE);
+        return b;
+    }
+
+    private GridPane grilla(Button... botones) {
+        GridPane g = new GridPane();
+        g.setHgap(12);
+        g.setVgap(12);
+        for (int c = 0; c < 2; c++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(50);
+            cc.setHgrow(Priority.ALWAYS);
+            g.getColumnConstraints().add(cc);
+        }
+        for (int i = 0; i < botones.length; i++) {
+            if (botones.length == 1) {
+                g.add(botones[i], 0, 0, 2, 1);
+            } else {
+                g.add(botones[i], i % 2, i / 2);
+            }
+        }
+        return g;
+    }
+
+    private VBox seccion(String titulo, GridPane contenido) {
+        Label lbl = new Label(titulo.toUpperCase());
+        lbl.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #1565c0;");
+        return new VBox(10, lbl, contenido);
     }
 }

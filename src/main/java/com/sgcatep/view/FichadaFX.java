@@ -2,7 +2,7 @@ package com.sgcatep.view;
 
 import com.sgcatep.controller.FichadaController;
 import com.sgcatep.model.domain.Usuario;
-import com.sgcatep.model.service.GestorFichada;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,12 +16,10 @@ import java.sql.SQLException;
 
 public class FichadaFX {
 
-    private final GestorFichada gestorFichada = new GestorFichada();
     private final FichadaController controller = new FichadaController();
 
     public void show(Stage stage, Usuario usuario) {
 
-        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -38,7 +36,6 @@ public class FichadaFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // contenido
         Label cuTag = new Label("CU-04");
         cuTag.getStyleClass().add("cu-tag");
 
@@ -52,7 +49,6 @@ public class FichadaFX {
         Separator sep1 = new Separator();
         sep1.setPadding(new Insets(4, 0, 4, 0));
 
-        // grilla con los datos del usuario
         Label hdrUsuario = new Label("USUARIO");
         hdrUsuario.setStyle("-fx-font-size: 10px; -fx-text-fill: #888888; -fx-font-weight: bold;");
         Label valUsuario = new Label(usuario.getNombre() + " " + usuario.getApellido());
@@ -72,7 +68,6 @@ public class FichadaFX {
         Separator sep2 = new Separator();
         sep2.setPadding(new Insets(4, 0, 4, 0));
 
-        // entrada/salida
         Label lblTipo = new Label("Tipo de acceso:");
         lblTipo.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
         ComboBox<String> cmbTipo = new ComboBox<>();
@@ -81,7 +76,6 @@ public class FichadaFX {
         cmbTipo.setPrefWidth(320);
         cmbTipo.getStyleClass().add("combo-box");
 
-        // presencial/remoto
         Label lblModalidad = new Label("Modalidad:");
         lblModalidad.setStyle("-fx-font-size: 13px; -fx-font-weight: bold;");
         ComboBox<String> cmbModalidad = new ComboBox<>();
@@ -90,7 +84,6 @@ public class FichadaFX {
         cmbModalidad.setPrefWidth(320);
         cmbModalidad.getStyleClass().add("combo-box");
 
-        // alerta de que revisamos si cuenta con autorizacion para trabajar remoto
         Label lblAviso = new Label("La autorización de trabajo remoto se validará automáticamente.");
         lblAviso.setStyle("-fx-text-fill: #1565c0; -fx-font-size: 12px; "
                 + "-fx-background-color: #e3f2fd; -fx-padding: 8px 12px; "
@@ -109,16 +102,17 @@ public class FichadaFX {
         lblMensaje.setWrapText(true);
         lblMensaje.setMaxWidth(320);
 
-        // botones
         Button btnCancelar = new Button("CANCELAR");
         btnCancelar.getStyleClass().add("btn-secundario");
-        btnCancelar.setPrefHeight(40);
+        btnCancelar.setPrefHeight(44);
+        btnCancelar.setMinWidth(Region.USE_PREF_SIZE);
 
         Button btnRegistrar = new Button("REGISTRAR FICHADA");
         btnRegistrar.getStyleClass().add("btn-primario");
-        btnRegistrar.setPrefHeight(40);
+        btnRegistrar.setPrefHeight(44);
+        btnRegistrar.setMinWidth(Region.USE_PREF_SIZE);
 
-        HBox botonesBox = new HBox(12, btnCancelar, btnRegistrar);
+        HBox botonesBox = new HBox(14, btnCancelar, btnRegistrar);
         botonesBox.setAlignment(Pos.CENTER_RIGHT);
 
         btnRegistrar.setOnAction(e -> {
@@ -133,12 +127,9 @@ public class FichadaFX {
             }
         });
 
-        btnCancelar.setOnAction(e -> {
-            MenuPrincipalFX menu = new MenuPrincipalFX();
-            menu.show(stage, usuario);
-        });
+        btnCancelar.setOnAction(e -> new MenuPrincipalFX().show(stage, usuario));
 
-        VBox card = new VBox(12,
+        VBox card = new VBox(15,
                 cuTag, cardTitulo, cardSub, sep1,
                 infoBox, sep2,
                 lblTipo, cmbTipo,
@@ -148,10 +139,9 @@ public class FichadaFX {
                 botonesBox
         );
         card.getStyleClass().add("card");
-        card.setMaxWidth(420);
+        card.setPadding(new Insets(24));
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -159,18 +149,24 @@ public class FichadaFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // estilos
         StackPane centro = new StackPane(card);
         centro.setPadding(new Insets(30));
-        VBox.setVgrow(centro, Priority.ALWAYS);
 
-        VBox root = new VBox(header, centro, footerBox);
+        ScrollPane scroll = new ScrollPane(centro);
+        scroll.setFitToWidth(true);
+        scroll.setStyle("-fx-background-color: #eef2f7; -fx-background: #eef2f7;");
 
-        Scene scene = new Scene(root, 520, 600);
+        Escala.ajustarCard(card, scroll);
+
+        VBox raiz = new VBox(header, scroll, footerBox);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+
+        Scene scene = new Scene(raiz, 560, 620);
         var cssUrl = getClass().getResource("/styles.css");
         if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 
         stage.setTitle("SGCA-TEP - Registrar Fichada");
         stage.setScene(scene);
+        stage.setResizable(true);
     }
 }

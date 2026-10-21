@@ -3,6 +3,7 @@ package com.sgcatep.view;
 import com.sgcatep.controller.AccesoController;
 import com.sgcatep.model.domain.Sistema;
 import com.sgcatep.model.domain.Usuario;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -70,7 +71,6 @@ public class SolicitarAccesoFX {
         Label lblMensaje = new Label();
         lblMensaje.setWrapText(true);
 
-        // combo y lista van en el mismo orden, así uso el índice
         final List<Sistema> sistemas = new ArrayList<>();
         try {
             sistemas.addAll(controller.listarSistemasActivos());
@@ -84,15 +84,15 @@ public class SolicitarAccesoFX {
 
         Button btnVolver = new Button("VOLVER");
         btnVolver.getStyleClass().add("btn-secundario");
-        btnVolver.setPrefHeight(40);
+        btnVolver.setPrefHeight(44);
         btnVolver.setMinWidth(Region.USE_PREF_SIZE);
 
         Button btnSolicitar = new Button("SOLICITAR ACCESO");
         btnSolicitar.getStyleClass().add("btn-primario");
-        btnSolicitar.setPrefHeight(40);
+        btnSolicitar.setPrefHeight(44);
         btnSolicitar.setMinWidth(Region.USE_PREF_SIZE);
 
-        HBox botonesBox = new HBox(12, btnVolver, btnSolicitar);
+        HBox botonesBox = new HBox(14, btnVolver, btnSolicitar);
         botonesBox.setAlignment(Pos.CENTER_RIGHT);
 
         btnSolicitar.setOnAction(e -> {
@@ -113,12 +113,9 @@ public class SolicitarAccesoFX {
             }
         });
 
-        btnVolver.setOnAction(e -> {
-            MenuPrincipalFX menu = new MenuPrincipalFX();
-            menu.show(stage, usuario);
-        });
+        btnVolver.setOnAction(e -> new MenuPrincipalFX().show(stage, usuario));
 
-        VBox card = new VBox(12,
+        VBox card = new VBox(15,
                 cuTag, cardTitulo, cardSub, lblPasos, sep1,
                 lblUsuario,
                 lblSistema, cmbSistema,
@@ -126,7 +123,7 @@ public class SolicitarAccesoFX {
                 botonesBox
         );
         card.getStyleClass().add("card");
-        card.setMaxWidth(560);
+        card.setPadding(new Insets(24));
         card.setAlignment(Pos.CENTER_LEFT);
 
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
@@ -143,10 +140,12 @@ public class SolicitarAccesoFX {
         scroll.setFitToWidth(true);
         scroll.setStyle("-fx-background-color: #eef2f7; -fx-background: #eef2f7;");
 
+        Escala.ajustarCard(card, scroll);
+
         VBox root = new VBox(header, scroll, footerBox);
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        Scene scene = new Scene(root, 640, 620);
+        Scene scene = new Scene(root, 640, 660);
         var cssUrl = getClass().getResource("/styles.css");
         if (cssUrl != null) scene.getStylesheets().add(cssUrl.toExternalForm());
 

@@ -77,7 +77,7 @@ public class ConsultaAuditoriaFX {
         cmbArea.setPrefWidth(320);
         cmbArea.getStyleClass().add("combo-box");
 
-        HBox filtros = new HBox(16, lblArea, cmbArea);
+        HBox filtros = new HBox(14, lblArea, cmbArea);
         filtros.setAlignment(Pos.CENTER_LEFT);
 
         Label lblCantidad = new Label();
@@ -110,7 +110,7 @@ public class ConsultaAuditoriaFX {
 
         Button btnVolver = new Button("VOLVER");
         btnVolver.getStyleClass().add("btn-secundario");
-        btnVolver.setPrefHeight(46);
+        btnVolver.setPrefHeight(44);
         btnVolver.setMinWidth(Region.USE_PREF_SIZE);
 
         HBox botonesBox = new HBox(16, btnVolver);
@@ -118,11 +118,11 @@ public class ConsultaAuditoriaFX {
 
         btnVolver.setOnAction(e -> new MenuPrincipalFX().show(stage, usuario));
 
-        VBox card = new VBox(18,
+        VBox card = new VBox(15,
                 cuTag, cardTitulo, lblAlcance, filtros, lblCantidad,
                 paginacion, lblMensaje, botonesBox);
         card.getStyleClass().add("card");
-        card.setPadding(new Insets(28));
+        card.setPadding(new Insets(24));
         card.setAlignment(Pos.CENTER_LEFT);
 
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
@@ -146,9 +146,8 @@ public class ConsultaAuditoriaFX {
         var cssUrl = getClass().getResource("/styles.css");
         if (cssUrl != null) escena.getStylesheets().add(cssUrl.toExternalForm());
 
-        card.prefWidthProperty().bind(Bindings.createDoubleBinding(
-                () -> Math.max(560, scroll.getWidth() * 0.6), scroll.widthProperty()));
-        paginacion.prefHeightProperty().bind(escena.heightProperty().multiply(0.5));
+        Escala.ajustarCard(card, scroll);
+        paginacion.prefHeightProperty().bind(escena.heightProperty().multiply(0.42));
 
         refrescar.run();
 
@@ -160,7 +159,7 @@ public class ConsultaAuditoriaFX {
     private ListView<String> crearPagina(Usuario usuario, Integer idArea, int pagina, Label lblMensaje) {
         ListView<String> lista = new ListView<>();
         lista.setPlaceholder(new Label("Sin registros para mostrar"));
-        lista.prefHeightProperty().bind(escena.heightProperty().multiply(0.45));
+        lista.prefHeightProperty().bind(escena.heightProperty().multiply(0.38));
         try {
             lista.getItems().addAll(controller.auditoria(usuario, idArea, pagina).lineas());
         } catch (SQLException ex) {
