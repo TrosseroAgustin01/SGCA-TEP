@@ -1,5 +1,6 @@
 package com.sgcatep.view;
 
+import com.sgcatep.exception.CambioClaveObligatorioException;
 import com.sgcatep.exception.UsuarioInactivoException;
 import com.sgcatep.model.domain.Usuario;
 import com.sgcatep.model.service.GestorAcceso;
@@ -11,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+
 import java.sql.SQLException;
 
 public class LoginFX {
@@ -21,7 +23,6 @@ public class LoginFX {
     public void show(Stage primaryStage) {
         this.stage = primaryStage;
 
-        // header
         Label lblTitulo = new Label("SGCA-TEP");
         lblTitulo.getStyleClass().add("header-titulo");
 
@@ -30,7 +31,6 @@ public class LoginFX {
 
         VBox textoHeader = new VBox(2, lblTitulo, lblSub);
 
-        // agregue con un icono que "representa" el logo del TEP
         Label icono = new Label("⊛");
         icono.setStyle("-fx-text-fill: white; -fx-font-size: 22px;");
 
@@ -39,7 +39,6 @@ public class LoginFX {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPrefWidth(Double.MAX_VALUE);
 
-        // contenido
         Label cuTag = new Label("CU-05");
         cuTag.getStyleClass().add("cu-tag");
 
@@ -91,7 +90,6 @@ public class LoginFX {
         card.setMaxWidth(380);
         card.setAlignment(Pos.CENTER_LEFT);
 
-        // pie
         Label footer = new Label("SGCA-TEP · Sistema de Gestión y Control de Acceso Integrado");
         footer.getStyleClass().add("footer-texto");
 
@@ -99,7 +97,6 @@ public class LoginFX {
         footerBox.setAlignment(Pos.CENTER);
         footerBox.setPadding(new Insets(12));
 
-        // estilos
         StackPane centro = new StackPane(card);
         centro.setPadding(new Insets(40));
         VBox.setVgrow(centro, Priority.ALWAYS);
@@ -118,7 +115,6 @@ public class LoginFX {
         stage.show();
     }
 
-
     private void intentarLogin(TextField txtDni, PasswordField txtPass, Label lblMensaje) {
         String dni = txtDni.getText().trim();
         String pass = txtPass.getText().trim();
@@ -130,12 +126,13 @@ public class LoginFX {
         try {
             Usuario usuario = gestorAcceso.login(dni, pass);
             if (usuario != null) {
-                MenuPrincipalFX menu = new MenuPrincipalFX();
-                menu.show(stage, usuario);
+                new MenuPrincipalFX().show(stage, usuario);
             } else {
                 lblMensaje.setText("DNI o contraseña incorrectos.");
                 txtPass.clear();
             }
+        } catch (CambioClaveObligatorioException ex) {
+            new CambioClaveFX().show(stage, dni, pass);
         } catch (UsuarioInactivoException ex) {
             lblMensaje.setText(ex.getMessage());
             txtPass.clear();

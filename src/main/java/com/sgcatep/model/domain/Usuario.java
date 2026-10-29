@@ -13,6 +13,7 @@ public class Usuario {
     private String email;
     private String contraseña;
     private boolean activo;
+    private boolean debeCambiarClave;
     private Area area;
     private List<Rol> roles;
     private LocalDateTime fechaCreacion;
@@ -97,6 +98,14 @@ public class Usuario {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public boolean isDebeCambiarClave() {
+        return debeCambiarClave;
+    }
+
+    public void setDebeCambiarClave(boolean debeCambiarClave) {
+        this.debeCambiarClave = debeCambiarClave;
     }
 
     public Area getArea() {

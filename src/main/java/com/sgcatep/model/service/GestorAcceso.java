@@ -1,12 +1,21 @@
 package com.sgcatep.model.service;
 
 import com.sgcatep.ConexionDB;
-import com.sgcatep.exception.*;
-import com.sgcatep.model.domain.*;
+import com.sgcatep.exception.AsignacionRolException;
+import com.sgcatep.exception.AsignacionFallidaException;
+import com.sgcatep.exception.CambioClaveObligatorioException;
+import com.sgcatep.exception.PermisoInsuficienteException;
+import com.sgcatep.exception.RolInexistenteException;
+import com.sgcatep.exception.UsuarioInactivoException;
+import com.sgcatep.model.domain.LogAuditoria;
+import com.sgcatep.model.domain.Permiso;
+import com.sgcatep.model.domain.Rol;
+import com.sgcatep.model.domain.Sistema;
+import com.sgcatep.model.domain.Usuario;
 import com.sgcatep.model.repository.LogAuditoriaRepository;
+import com.sgcatep.model.repository.PermisoRepository;
 import com.sgcatep.model.repository.RolRepository;
 import com.sgcatep.model.repository.UsuarioRepository;
-import com.sgcatep.model.repository.PermisoRepository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,8 +26,8 @@ public class GestorAcceso {
 
     private final UsuarioRepository usuarioRepository = new UsuarioRepository();
     private final RolRepository rolRepository = new RolRepository();
-    private final LogAuditoriaRepository logRepository = new LogAuditoriaRepository();
     private final PermisoRepository permisoRepository = new PermisoRepository();
+    private final LogAuditoriaRepository logRepository = new LogAuditoriaRepository();
     private final Validador validador = new Validador();
 
     public Map<String, Object> solicitarAcceso(Usuario usuario, Sistema sistema) throws SQLException {
@@ -85,14 +94,15 @@ public class GestorAcceso {
 
     public void asignarRol(Usuario admin, Usuario destino, Rol rol, int idArea)
             throws SQLException, AsignacionRolException {
+        if (admin == null || destino == null || rol == null) {
+            throw new AsignacionRolException("Datos incompletos para asignar el rol.");
+        }
+
         Usuario adminActual = usuarioRepository.buscarPorId(admin.getIdUsuario());
         if (adminActual == null || !adminActual.tienePermiso(permisoAsignarRoles())) {
             logRepository.registrarRechazo(admin, "ASIGNACION_ROL", "SIN_PERMISOS_ASIGNACION",
                     "Administrador sin permiso Asignar roles", null);
             throw new PermisoInsuficienteException("No posee permisos para asignar roles.");
-        }
-        if (admin == null || destino == null || rol == null) {
-            throw new AsignacionRolException("Datos incompletos para asignar el rol.");
         }
 
         if (!validador.verificarEstadoUsuario(destino)) {
@@ -175,7 +185,7 @@ public class GestorAcceso {
     }
 
     public Usuario login(String dni, String contraseña)
-            throws SQLException, UsuarioInactivoException {
+            throws SQLException, UsuarioInactivoException, CambioClaveObligatorioException {
         if (!validador.validarDni(dni)) {
             logRepository.registrarRechazo(null, "LOGIN",
                     "DNI_INVALIDO", "DNI con formato incorrecto: " + dni, null);
@@ -203,12 +213,20 @@ public class GestorAcceso {
                     "La cuenta está inactiva. Consulte con el administrador.");
         }
 
+        if (usuario.isDebeCambiarClave()) {
+            logRepository.registrarRechazo(usuario, "LOGIN",
+                    "CAMBIO_CLAVE_PENDIENTE", "Primer ingreso: debe cambiar la contraseña", null);
+            throw new CambioClaveObligatorioException(
+                    "Debe cambiar su contraseña antes de ingresar.");
+        }
+
         logRepository.registrarEvento(usuario, "LOGIN",
                 LogAuditoria.Resultado.AUTORIZADO,
                 "Login exitoso", null);
 
         return usuario;
     }
+
     private Permiso permisoAsignarRoles() throws SQLException {
         return permisoRepository.buscarPorNombre("Asignar roles");
     }

@@ -8,7 +8,6 @@ import com.sgcatep.model.domain.Usuario;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -143,39 +142,9 @@ public class UsuarioRepository extends BaseRepository {
         return usuarios;
     }
 
-    public List<Integer> listarAreasConPermisos(int idUsuario, String... permisos) throws SQLException {
-        List<Integer> areas = new ArrayList<>();
-        String marcas = String.join(",", Collections.nCopies(permisos.length, "?"));
-        String sql = """
-            SELECT ur.id_area
-            FROM USUARIO_ROL ur
-            JOIN ROL_PERMISO rp ON rp.id_rol = ur.id_rol
-            JOIN PERMISO p ON p.id_permiso = rp.id_permiso
-            WHERE ur.id_usuario = ? AND p.activo = TRUE AND p.nombre_permiso IN (%s)
-            GROUP BY ur.id_area
-            HAVING COUNT(DISTINCT p.nombre_permiso) = ?
-            """.formatted(marcas);
-        Connection conn = getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, idUsuario);
-            for (int i = 0; i < permisos.length; i++) {
-                stmt.setString(i + 2, permisos[i]);
-            }
-            stmt.setInt(permisos.length + 2, permisos.length);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    areas.add(rs.getInt("id_area"));
-                }
-            }
-        }
-        return areas;
-    }
-
     public int insertar(Usuario usuario) throws SQLException {
-        String sql = "INSERT INTO USUARIO (dni, nombre, apellido, email, contraseña, activo, id_area) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO USUARIO (dni, nombre, apellido, email, contraseña, activo, id_area, debe_cambiar_clave) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -186,6 +155,7 @@ public class UsuarioRepository extends BaseRepository {
             stmt.setString(5, hashearContraseña(usuario.getContraseña()));
             stmt.setBoolean(6, usuario.isActivo());
             stmt.setInt(7, usuario.getArea().getIdArea());
+            stmt.setBoolean(8, usuario.isDebeCambiarClave());
 
             int filasAfectadas = stmt.executeUpdate();
             if (filasAfectadas == 0) {
@@ -221,7 +191,7 @@ public class UsuarioRepository extends BaseRepository {
     }
 
     public boolean cambiarContraseña(int idUsuario, String nuevaContraseña) throws SQLException {
-        String sql = "UPDATE USUARIO SET contraseña = ? WHERE id_usuario = ?";
+        String sql = "UPDATE USUARIO SET contraseña = ?, debe_cambiar_clave = FALSE WHERE id_usuario = ?";
         Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -291,7 +261,7 @@ public class UsuarioRepository extends BaseRepository {
                 "JOIN AREA a ON a.id_area = ur.id_area " +
                 "WHERE ur.id_usuario = ? AND r.activo = TRUE " +
                 "ORDER BY r.nombre_rol, a.nombre_area";
-        Connection conn = ConexionDB.getConnection();
+        Connection conn = getConnection();
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idUsuario);
@@ -305,11 +275,41 @@ public class UsuarioRepository extends BaseRepository {
         return roles;
     }
 
+    public List<Integer> listarAreasConPermisos(int idUsuario, String... permisos) throws SQLException {
+        List<Integer> areas = new ArrayList<>();
+        String marcas = String.join(",", Collections.nCopies(permisos.length, "?"));
+        String sql = """
+                SELECT ur.id_area
+                FROM USUARIO_ROL ur
+                JOIN ROL_PERMISO rp ON rp.id_rol = ur.id_rol
+                JOIN PERMISO p ON p.id_permiso = rp.id_permiso
+                WHERE ur.id_usuario = ? AND p.activo = TRUE AND p.nombre_permiso IN (%s)
+                GROUP BY ur.id_area
+                HAVING COUNT(DISTINCT p.nombre_permiso) = ?
+                """.formatted(marcas);
+        Connection conn = getConnection();
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            for (int i = 0; i < permisos.length; i++) {
+                stmt.setString(i + 2, permisos[i]);
+            }
+            stmt.setInt(permisos.length + 2, permisos.length);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    areas.add(rs.getInt("id_area"));
+                }
+            }
+        }
+        return areas;
+    }
+
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
         int idArea = rs.getInt("id_area");
         Area area = areaRepository.buscarPorId(idArea);
 
-        return new Usuario(
+        Usuario usuario = new Usuario(
                 rs.getInt("id_usuario"),
                 rs.getString("dni"),
                 rs.getString("nombre"),
@@ -320,6 +320,8 @@ public class UsuarioRepository extends BaseRepository {
                 area,
                 rs.getTimestamp("fecha_creacion").toLocalDateTime()
         );
+        usuario.setDebeCambiarClave(rs.getBoolean("debe_cambiar_clave"));
+        return usuario;
     }
 
     private String hashearContraseña(String contraseña) {

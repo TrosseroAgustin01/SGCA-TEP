@@ -96,11 +96,15 @@ public class MenuPrincipalFX {
             btnAsignarRoles.setTooltip(new Tooltip("Requiere rol Administrador"));
         }
 
+        Button btnUsuarios = boton("Gestionar usuarios", "btn-primario");
+        btnUsuarios.setOnAction(e -> new GestionUsuariosFX().show(stage, usuario));
+        btnUsuarios.setDisable(!esAdmin);
+
         VBox acciones = new VBox(24,
                 cardTitulo, cardSub,
                 seccion("Presencia y acceso", grilla(btnFichada, btnSolicitarAcceso)),
                 seccion("Consultas", grilla(btnConsulta, btnAuditoria)),
-                seccion("Administración", grilla(btnAsignarRoles)));
+                seccion("Administración", grilla(btnUsuarios ,btnAsignarRoles)));
         acciones.getStyleClass().add("card");
         acciones.setPadding(new Insets(24));
         HBox.setHgrow(acciones, Priority.ALWAYS);
