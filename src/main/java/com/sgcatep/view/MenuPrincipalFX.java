@@ -95,6 +95,8 @@ public class MenuPrincipalFX {
         if (!esAdmin) {
             btnAsignarRoles.setTooltip(new Tooltip("Requiere rol Administrador"));
         }
+        Button btnMiClave = boton("Cambiar mi contraseña", "btn-primario");
+        btnMiClave.setOnAction(e -> new MiClaveFX().show(stage, usuario));
 
         Button btnUsuarios = boton("Gestionar usuarios", "btn-primario");
         btnUsuarios.setOnAction(e -> new GestionUsuariosFX().show(stage, usuario));
@@ -104,7 +106,8 @@ public class MenuPrincipalFX {
                 cardTitulo, cardSub,
                 seccion("Presencia y acceso", grilla(btnFichada, btnSolicitarAcceso)),
                 seccion("Consultas", grilla(btnConsulta, btnAuditoria)),
-                seccion("Administración", grilla(btnUsuarios ,btnAsignarRoles)));
+                seccion("Administración", grilla(btnUsuarios ,btnAsignarRoles)),
+                seccion("Cuenta", grilla(btnMiClave)));
         acciones.getStyleClass().add("card");
         acciones.setPadding(new Insets(24));
         HBox.setHgrow(acciones, Priority.ALWAYS);

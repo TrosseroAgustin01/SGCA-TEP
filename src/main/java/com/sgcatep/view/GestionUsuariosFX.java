@@ -156,11 +156,7 @@ public class GestionUsuariosFX {
                 titulo("Área de trabajo"), cmbArea,
                 lblAdvertencia,
                 lblMensaje,
-                botonesBox,
-                new Separator(),
-                titulo("Cambiar mi contraseña"),
-                pwdActual, pwdNueva, pwdConfirma,
-                claveBox, lblClave);
+                botonesBox);
         card.getStyleClass().add("card");
         card.setPadding(new Insets(28));
         card.setAlignment(Pos.CENTER_LEFT);
