@@ -102,11 +102,16 @@ public class MenuPrincipalFX {
         btnUsuarios.setOnAction(e -> new GestionUsuariosFX().show(stage, usuario));
         btnUsuarios.setDisable(!esAdmin);
 
+        Button btnRemoto = boton("Autorizar trabajo remoto", "btn-primario");
+        btnRemoto.setOnAction(e -> new AutorizacionRemotaFX().show(stage, usuario));
+        btnRemoto.setDisable(!esAdmin);
+
         VBox acciones = new VBox(24,
                 cardTitulo, cardSub,
                 seccion("Presencia y acceso", grilla(btnFichada, btnSolicitarAcceso)),
                 seccion("Consultas", grilla(btnConsulta, btnAuditoria)),
                 seccion("Administración", grilla(btnUsuarios ,btnAsignarRoles)),
+                seccion("Autorizaciones", grilla(btnRemoto)),
                 seccion("Cuenta", grilla(btnMiClave)));
         acciones.getStyleClass().add("card");
         acciones.setPadding(new Insets(24));
