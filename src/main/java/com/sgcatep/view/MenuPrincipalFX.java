@@ -87,6 +87,9 @@ public class MenuPrincipalFX {
         Button btnAuditoria = boton("Consultar auditoría", "btn-primario");
         btnAuditoria.setOnAction(e -> new ConsultaAuditoriaFX().show(stage, usuario));
 
+        Button btnReportes = boton("Generar reportes", "btn-primario");
+        btnReportes.setOnAction(e -> new ReporteFX().show(stage, usuario));
+
         Button btnAsignarRoles = boton("Asignar Roles y Permisos", "btn-primario");
         btnAsignarRoles.setOnAction(e -> new AsignarRolesFX().show(stage, usuario));
         boolean esAdmin = usuario.getRoles().stream()
@@ -109,7 +112,7 @@ public class MenuPrincipalFX {
         VBox acciones = new VBox(24,
                 cardTitulo, cardSub,
                 seccion("Presencia y acceso", grilla(btnFichada, btnSolicitarAcceso)),
-                seccion("Consultas", grilla(btnConsulta, btnAuditoria)),
+                seccion("Consultas", grilla(btnConsulta, btnAuditoria, btnReportes)),
                 seccion("Administración", grilla(btnUsuarios ,btnAsignarRoles)),
                 seccion("Autorizaciones", grilla(btnRemoto)),
                 seccion("Cuenta", grilla(btnMiClave)));

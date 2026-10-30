@@ -10,6 +10,7 @@ import com.sgcatep.model.repository.LogAuditoriaRepository;
 import com.sgcatep.model.repository.UsuarioRepository;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,7 @@ public class VisibilidadService {
 
     public record Visibilidad(Alcance alcance, List<Fichada> fichadas) {}
     public record PaginaLogs(Alcance alcance, int total, List<LogAuditoria> registros) {}
+    public record Filtro(Alcance alcance, String condicion, List<Object> params) {}
 
     private static final String VER_FICHADAS = "Ver fichadas";
     private static final String GENERAR_REPORTES = "Generar reportes";
@@ -46,8 +48,15 @@ public class VisibilidadService {
         return new Visibilidad(Alcance.AREA, fichadaRepository.listarPorAreas(areas));
     }
 
-    public PaginaLogs logsVisibles(Usuario usuario, Integer idArea, int pagina, int tamanio)
+    public List<Fichada> fichadasEntre(Usuario usuario, LocalDate desde, LocalDate hasta)
             throws SQLException {
+        return fichadasVisibles(usuario).fichadas().stream()
+                .filter(f -> !f.getFechaHora().toLocalDate().isBefore(desde)
+                        && !f.getFechaHora().toLocalDate().isAfter(hasta))
+                .toList();
+    }
+
+    public Filtro filtroLogs(Usuario usuario, Integer idArea) throws SQLException {
         int id = usuario.getIdUsuario();
         List<Integer> areas = usuarioRepository.listarAreasConPermisos(
                 id, VER_FICHADAS, GENERAR_REPORTES);
@@ -74,11 +83,26 @@ public class VisibilidadService {
             condicion += " AND l.id_usuario IN (SELECT u.id_usuario FROM USUARIO u WHERE u.id_area = ?)";
             params.add(idArea);
         }
+        return new Filtro(alcance, condicion, params);
+    }
 
-        int total = logRepository.contarVisibles(condicion, params);
+    public PaginaLogs logsVisibles(Usuario usuario, Integer idArea, int pagina, int tamanio)
+            throws SQLException {
+        Filtro f = filtroLogs(usuario, idArea);
+        int total = logRepository.contarVisibles(f.condicion(), f.params());
         List<LogAuditoria> registros = logRepository.listarVisibles(
-                condicion, params, pagina * tamanio, tamanio);
-        return new PaginaLogs(alcance, total, registros);
+                f.condicion(), f.params(), pagina * tamanio, tamanio);
+        return new PaginaLogs(f.alcance(), total, registros);
+    }
+
+    public List<LogAuditoria> logsEntre(Usuario usuario, LocalDate desde, LocalDate hasta)
+            throws SQLException {
+        Filtro f = filtroLogs(usuario, null);
+        List<Object> params = new ArrayList<>(f.params());
+        params.add(desde.atStartOfDay());
+        params.add(hasta.plusDays(1).atStartOfDay());
+        String condicion = f.condicion() + " AND l.fecha_hora >= ? AND l.fecha_hora < ?";
+        return logRepository.listarVisibles(condicion, params, 0, Integer.MAX_VALUE);
     }
 
     private String marcas(int n) {
