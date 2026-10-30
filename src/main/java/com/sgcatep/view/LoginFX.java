@@ -1,9 +1,6 @@
 package com.sgcatep.view;
 
-import com.sgcatep.exception.CambioClaveObligatorioException;
-import com.sgcatep.exception.UsuarioInactivoException;
-import com.sgcatep.model.domain.Usuario;
-import com.sgcatep.model.service.GestorAcceso;
+import com.sgcatep.controller.LoginController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,11 +10,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import java.sql.SQLException;
-
 public class LoginFX {
 
-    private final GestorAcceso gestorAcceso = new GestorAcceso();
+    private final LoginController controller = new LoginController();
     private Stage stage;
 
     public void show(Stage primaryStage) {
@@ -119,25 +114,14 @@ public class LoginFX {
         String dni = txtDni.getText().trim();
         String pass = txtPass.getText().trim();
 
-        if (dni.isEmpty() || pass.isEmpty()) {
-            lblMensaje.setText("Debe completar todos los campos.");
-            return;
-        }
-        try {
-            Usuario usuario = gestorAcceso.login(dni, pass);
-            if (usuario != null) {
-                new MenuPrincipalFX().show(stage, usuario);
-            } else {
-                lblMensaje.setText("DNI o contraseña incorrectos.");
-                txtPass.clear();
-            }
-        } catch (CambioClaveObligatorioException ex) {
+        LoginController.Resultado r = controller.login(dni, pass);
+        if (r.usuario() != null) {
+            new MenuPrincipalFX().show(stage, r.usuario());
+        } else if (r.cambioPendiente()) {
             new CambioClaveFX().show(stage, dni, pass);
-        } catch (UsuarioInactivoException ex) {
-            lblMensaje.setText(ex.getMessage());
+        } else {
+            lblMensaje.setText(r.mensaje());
             txtPass.clear();
-        } catch (SQLException ex) {
-            lblMensaje.setText("Error de conexión: " + ex.getMessage());
         }
     }
 }

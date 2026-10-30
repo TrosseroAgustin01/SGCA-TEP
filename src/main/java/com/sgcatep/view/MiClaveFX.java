@@ -1,8 +1,7 @@
 package com.sgcatep.view;
 
-import com.sgcatep.exception.GestionUsuarioException;
+import com.sgcatep.controller.UsuarioController;
 import com.sgcatep.model.domain.Usuario;
-import com.sgcatep.model.service.GestorUsuario;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -12,11 +11,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import java.sql.SQLException;
-
 public class MiClaveFX {
 
-    private final GestorUsuario gestor = new GestorUsuario();
+    private final UsuarioController controller = new UsuarioController();
 
     public void show(Stage stage, Usuario usuario) {
 
@@ -82,16 +79,13 @@ public class MiClaveFX {
                 mostrar(lblMensaje, false, "La nueva contraseña no coincide con la repetición.");
                 return;
             }
-            try {
-                gestor.cambiarContrasena(usuario, pwdActual.getText(), pwdNueva.getText());
-                mostrar(lblMensaje, true, "Contraseña cambiada correctamente.");
+            UsuarioController.Resultado r = controller.cambiarContrasena(
+                    usuario, pwdActual.getText(), pwdNueva.getText());
+            mostrar(lblMensaje, r.ok(), r.mensaje());
+            if (r.ok()) {
                 pwdActual.clear();
                 pwdNueva.clear();
                 pwdConfirma.clear();
-            } catch (GestionUsuarioException ex) {
-                mostrar(lblMensaje, false, ex.getMessage());
-            } catch (SQLException ex) {
-                mostrar(lblMensaje, false, "Error de base de datos: " + ex.getMessage());
             }
         });
 

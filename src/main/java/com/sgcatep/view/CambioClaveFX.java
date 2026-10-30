@@ -1,9 +1,6 @@
 package com.sgcatep.view;
 
-import com.sgcatep.model.service.GestorUsuario;
-import com.sgcatep.model.domain.Usuario;
-import com.sgcatep.model.repository.UsuarioRepository;
-import com.sgcatep.exception.GestionUsuarioException;
+import com.sgcatep.controller.UsuarioController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -13,9 +10,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import java.sql.SQLException;
-
 public class CambioClaveFX {
+
+    private final UsuarioController controller = new UsuarioController();
 
     public void show(Stage stage, String dni, String claveActual) {
 
@@ -78,19 +75,11 @@ public class CambioClaveFX {
                 mostrar(lblMensaje, false, "La nueva contraseña no coincide con la repetición.");
                 return;
             }
-            try {
-                Usuario usuario = new UsuarioRepository().autenticar(dni, claveActual);
-                if (usuario == null) {
-                    mostrar(lblMensaje, false, "No se pudo verificar la sesión. Vuelva a ingresar.");
-                    return;
-                }
-                new GestorUsuario().cambiarContrasena(usuario, claveActual, nueva);
-                mostrar(lblMensaje, true, "Contraseña actualizada. Ingrese nuevamente.");
+            UsuarioController.Resultado r = controller.cambiarClavePrimerIngreso(dni, claveActual, nueva);
+            if (r.ok()) {
                 new LoginFX().show(stage);
-            } catch (GestionUsuarioException ex) {
-                mostrar(lblMensaje, false, ex.getMessage());
-            } catch (SQLException ex) {
-                mostrar(lblMensaje, false, "Error de base de datos: " + ex.getMessage());
+            } else {
+                mostrar(lblMensaje, false, r.mensaje());
             }
         });
 

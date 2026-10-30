@@ -52,6 +52,16 @@ public class UsuarioController {
                 () -> gestor.cambiarContrasena(usuario, actual, nueva));
     }
 
+    public Resultado cambiarClavePrimerIngreso(String dni, String actual, String nueva) {
+        return correr("Contraseña actualizada. Ingrese nuevamente.", () -> {
+            Usuario usuario = usuarioRepository.autenticar(dni, actual);
+            if (usuario == null) {
+                throw new GestionUsuarioException("No se pudo verificar la sesión. Vuelva a ingresar.");
+            }
+            gestor.cambiarContrasena(usuario, actual, nueva);
+        });
+    }
+
     private Resultado correr(String okMensaje, Operacion op) {
         try {
             op.ejecutar();
